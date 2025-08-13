@@ -2,7 +2,6 @@ package com.xuecheng.content.mapper;
 
 import com.xuecheng.content.model.po.CourseTeacher;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.springframework.stereotype.Repository;
 
 /**
  * <p>
