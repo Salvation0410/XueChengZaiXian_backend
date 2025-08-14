@@ -94,5 +94,10 @@
           and one.course_id = #{id}
         order by one.orderby,two.orderby
     </select>
+    <select id="selectCountByParentid" resultType="java.lang.Long">
+        select count(*)
+        from teachplan one inner join teachplan two on two.parentid = one.id
+        where one.id = #{id}
+    </select>
 
 </mapper>
