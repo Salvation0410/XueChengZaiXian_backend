@@ -1,0 +1,47 @@
+package com.xuecheng.content.mapper;
+
+import com.xuecheng.content.model.dto.SaveTeachplanDto;
+import com.xuecheng.content.model.dto.TeachplanDto;
+import com.xuecheng.content.service.TeachplanService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * @ClassName TeachPlanController
+ * @Description 课程计划管理模块相关接口
+ * @Author
+ * @Date 2025/8/14 16:12
+ */
+
+
+@RestController
+@Slf4j
+@Api(tags = "课程计划管理接口")
+@RequiredArgsConstructor
+public class TeachPlanController {
+
+    @Autowired
+    private TeachplanMapper teachplanMapper;
+
+
+    private final TeachplanService teachplanService;
+
+    @GetMapping("/teachplan/{courseId}/tree-nodes")
+    @ApiOperation("查询课程计划树形结构")
+    public List<TeachplanDto> getTreeNodes(@PathVariable Long courseId){
+        List<TeachplanDto> teachplanTree = teachplanMapper.selectTreeNodes(courseId);
+        return teachplanTree;
+    }
+
+    @PostMapping("/teachplan")
+    @ApiOperation("课程计划创建或修改")
+    public void saveTeachPlan(@RequestBody SaveTeachplanDto saveTeachplanDto){
+        teachplanService.saveTeachplan(saveTeachplanDto);
+    }
+}
