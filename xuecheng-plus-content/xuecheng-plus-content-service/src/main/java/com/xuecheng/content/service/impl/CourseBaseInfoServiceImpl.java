@@ -7,18 +7,14 @@ import com.sun.xml.internal.bind.v2.TODO;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
-import com.xuecheng.content.mapper.CourseBaseMapper;
-import com.xuecheng.content.mapper.CourseCategoryMapper;
-import com.xuecheng.content.mapper.CourseMarketMapper;
+import com.xuecheng.content.mapper.*;
 //import com.xuecheng.content.model.dto.AddCourseDto;
 //import com.xuecheng.content.model.dto.CourseBaseInfoDto;
 import com.xuecheng.content.model.dto.AddCourseDto;
 import com.xuecheng.content.model.dto.CourseBaseInfoDto;
 import com.xuecheng.content.model.dto.EditCourseDto;
 import com.xuecheng.content.model.dto.QueryCourseParamsDto;
-import com.xuecheng.content.model.po.CourseBase;
-import com.xuecheng.content.model.po.CourseCategory;
-import com.xuecheng.content.model.po.CourseMarket;
+import com.xuecheng.content.model.po.*;
 import com.xuecheng.content.service.CourseBaseInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /*
 *
@@ -50,6 +47,13 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
 
     @Autowired
     CourseCategoryMapper courseCategoryMapper;
+    @Autowired
+    private CourseTeacherMapper courseTeacherMapper;
+    @Autowired
+    private TeachplanMapper teachplanMapper;
+    @Autowired
+    private TeachplanMediaMapper teachplanMediaMapper;
+
 
     @Override
     public PageResult<CourseBase> queryCourseBaseList(PageParams pageParams, QueryCourseParamsDto courseParamsDto) {
@@ -218,6 +222,59 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         //返回课程信息对象
         CourseBaseInfoDto courseBaseInfoDto = getCourseBaseInfo(courseId);
         return courseBaseInfoDto;
+    }
+
+    @Override
+    @Transactional
+    public void deleteCourseBase(Long companyId, Long courseId) {
+        //根据id查询课程
+        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        //判断课程是否是该机构的
+        if (!courseBase.getCompanyId().equals(companyId)){
+            XueChengPlusException.cast("只能删除本机构的课程");
+        }
+        //删除课程教师信息
+        //先查询该课程所有的教师信息
+        LambdaQueryWrapper<CourseTeacher> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(CourseTeacher::getCourseId,courseId);
+        List<CourseTeacher> courseTeachers = courseTeacherMapper.selectList(queryWrapper);
+        if (courseTeachers!=null && courseTeachers.size()>0){
+            //批量删除教师信息
+            List<Long> ids = courseTeachers.stream().map(CourseTeacher::getId).collect(Collectors.toList());
+            courseTeacherMapper.deleteBatchIds(ids);
+        }
+
+        //删除课程计划
+        //1.1先查询该课程所有的媒资信息
+        LambdaQueryWrapper<TeachplanMedia> queryWrapper1 = new LambdaQueryWrapper<>();
+        queryWrapper1.eq(TeachplanMedia::getCourseId,courseId);
+        List<TeachplanMedia> teachplanMedias = teachplanMediaMapper.selectList(queryWrapper1);
+        if (teachplanMedias!=null && teachplanMedias.size()>0){
+            //1.2批量删除媒资信息
+            List<Long> ids = teachplanMedias.stream().map(TeachplanMedia::getId).collect(Collectors.toList());
+            teachplanMediaMapper.deleteBatchIds(ids);
+        }
+        //2.1先查询该课程所有的课程计划
+        LambdaQueryWrapper<Teachplan> queryWrapper2 = new LambdaQueryWrapper<>();
+        queryWrapper2.eq(Teachplan::getCourseId,courseId);
+        List<Teachplan> teachplans = teachplanMapper.selectList(queryWrapper2);
+        if (teachplans!=null && teachplans.size()>0){
+            //2.2批量删除课程计划
+            List<Long> ids = teachplans.stream().map(Teachplan::getId).collect(Collectors.toList());
+            teachplanMapper.deleteBatchIds(ids);
+        }
+        //删除营销信息
+        //首先根据课程id查询是否有营销信息
+        LambdaQueryWrapper<CourseMarket> queryWrapper3 = new LambdaQueryWrapper<>();
+        queryWrapper3.eq(CourseMarket::getId,courseId);
+        CourseMarket courseMarket = courseMarketMapper.selectOne(queryWrapper3);
+        if (courseMarket!=null){
+            //有则删除
+            courseMarketMapper.deleteById(courseId);
+        }
+
+        //删除课程基本信息
+        courseBaseMapper.deleteById(courseId);
     }
 
     //单独写一个方法保存营销信息，逻辑：存在则更新，不存在则添加
