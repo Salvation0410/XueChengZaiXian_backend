@@ -6,8 +6,8 @@ import lombok.Data;
 /**
  * @author Mr.M
  * @version 1.0
- * @description TODO
- * @date 2023/2/14 10:22
+ * @description 修改课程的dto 只比新增多了一个id
+ * @date 2023/2/14
  */
 @Data
 public class EditCourseDto extends AddCourseDto {
