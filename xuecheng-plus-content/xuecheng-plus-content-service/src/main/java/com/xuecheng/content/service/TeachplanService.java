@@ -30,4 +30,14 @@ public interface TeachplanService {
  * 删除课程计划
  * */
  void deleteTeachPlan(Long courseId);
+
+ /*
+ * 课程计划上移
+ * */
+ void moveUp(Long id);
+
+ /*
+ * 课程计划下移
+ * */
+ void moveDown(Long id);
 }

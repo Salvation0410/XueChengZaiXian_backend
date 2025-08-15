@@ -15,13 +15,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @author Mr.M
  * @version 1.0
- * @description TODO
- * @date 2023/2/14 12:11
+ * @description 课程计划方法实现
+ * @date 2023/2/14
  */
 @Service
 @RequiredArgsConstructor
@@ -38,7 +41,9 @@ public class TeachplanServiceImpl implements TeachplanService {
         return teachplanDtos;
     }
 
-
+    /*
+    * 添加/修改课程计划
+    * */
     @Override
     public void saveTeachplan(SaveTeachplanDto saveTeachplanDto) {
         //通过课程计划id判断添加还是修改
@@ -61,14 +66,20 @@ public class TeachplanServiceImpl implements TeachplanService {
             teachplanMapper.updateById(teachplan);
         }
 
+        /*
+        * 获取课程计划数
+        * */
     }
-    private int getTeachplanCount(Long parentId, Long courseId) {
+        private int getTeachplanCount(Long parentId, Long courseId) {
         LambdaQueryWrapper<Teachplan> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Teachplan::getParentid,parentId).eq(Teachplan::getCourseId,courseId);
         int count = teachplanMapper.selectCount(queryWrapper);
         return count+1;
     }
 
+    /*
+    * 删除课程计划
+    * */
     @Override
     @Transactional
     public void deleteTeachPlan(Long courseId) {
@@ -110,5 +121,96 @@ public class TeachplanServiceImpl implements TeachplanService {
         }
     }
 
+    /*
+    * 课程计划上移
+    * */
+    @Override
+    @Transactional
+    public void moveUp(Long id) {
+        // 查询课程信息
+        Teachplan currentPlan = teachplanMapper.selectById(id);
+        if(currentPlan == null){
+            XueChengPlusException.cast("课程计划不存在");
+        }
 
-}
+        // 查询同级课程计划
+        LambdaQueryWrapper<Teachplan> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Teachplan::getCourseId, currentPlan.getCourseId())
+                .eq(Teachplan::getParentid, currentPlan.getParentid())
+                .orderByAsc(Teachplan::getOrderby);
+
+        List<Teachplan> teachplanList = teachplanMapper.selectList(queryWrapper);
+
+        // 检查是否为第一个课程计划
+        if(teachplanList.get(0).getId().equals(id)){
+            XueChengPlusException.cast("当前为第一个课程计划，无法上移");
+        }
+
+        // 获取当前课程计划在列表中的位置
+        //创建一个整数流 获取从0到teachplanList.size()-1 的所有整数
+        int currentIndex = IntStream.range(0, teachplanList.size())
+                //teachplanList.get(i)获取列表中的索引位置
+                .filter(i -> teachplanList.get(i).getId().equals(id))
+                //返回第一个匹配的结果
+                .findFirst()
+                //如果Optionallnt 即findFirst()返回结果为空时 抛出指定异常
+                .orElseThrow(() -> new XueChengPlusException("课程计划数据异常"));
+
+        // 获取前一个课程计划
+        Teachplan prePlan = teachplanList.get(currentIndex - 1);
+
+        // 交换排序号
+        Integer currentOrder = currentPlan.getOrderby();
+        currentPlan.setOrderby(prePlan.getOrderby());
+        prePlan.setOrderby(currentOrder);
+
+        // 批量更新
+        List<Teachplan> updates = Arrays.asList(currentPlan, prePlan);
+        updates.forEach(teachplanMapper::updateById);
+    }
+
+    /*
+    * 课程计划下移
+    * */
+    @Override
+    @Transactional
+    public void moveDown(Long id) {
+        // 1. 查询课程计划
+        Teachplan currentTeachplan = teachplanMapper.selectById(id);
+        if (currentTeachplan == null) {
+            XueChengPlusException.cast("课程计划不存在");
+        }
+
+        // 2. 查询同级课程计划（使用链式调用）
+        List<Teachplan> teachplanList = teachplanMapper.selectList(new LambdaQueryWrapper<Teachplan>()
+                .eq(Teachplan::getParentid, currentTeachplan.getParentid())
+                .eq(Teachplan::getCourseId, currentTeachplan.getCourseId())
+                .orderByAsc(Teachplan::getOrderby));
+
+        // 3. 检查是否为最后一个元素
+        if (teachplanList.get(teachplanList.size() - 1).getId().equals(id)) {
+            XueChengPlusException.cast("课程计划已经属于最后一个，无法下移");
+        }
+
+        // 4. 获取当前计划位置（优化后的查找方式）
+        int currentIndex = IntStream.range(0, teachplanList.size())
+                .filter(i -> teachplanList.get(i).getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new XueChengPlusException("课程计划数据异常"));
+
+        // 5. 获取下一个计划
+        Teachplan nextTeachplan = teachplanList.get(currentIndex + 1);
+
+        // 6. 交换排序号（使用事务保证一致性）
+        Integer currentOrder = currentTeachplan.getOrderby();
+        currentTeachplan.setOrderby(nextTeachplan.getOrderby());
+        nextTeachplan.setOrderby(currentOrder);
+
+        // 7. 批量更新
+        List<Teachplan> updates = Arrays.asList(currentTeachplan, nextTeachplan);
+        updates.forEach(teachplanMapper::updateById);
+
+        }
+    }
+
+
