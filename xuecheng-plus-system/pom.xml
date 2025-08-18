@@ -18,4 +18,11 @@
         <module>xuecheng-plus-system-service</module>
         <module>xuecheng-plus-system-model</module>
     </modules>
+    <dependencies>
+        <!--添加nacos服务发现依赖-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+    </dependencies>
 </project>

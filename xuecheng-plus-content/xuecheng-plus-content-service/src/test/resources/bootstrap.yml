@@ -7,7 +7,6 @@ spring:
     username: root
     password: 123456
 
-
 # 日志文件配置路径
 logging:
   config: classpath:log4j2-dev.xml

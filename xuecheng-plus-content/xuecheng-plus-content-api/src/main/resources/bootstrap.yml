@@ -1,22 +1,23 @@
-server:
-  servlet:
-    context-path: /content #所有接口的根路径
-  port: 63040 #服务的端口
-#微服务配置
 spring:
   application:
-    name: content-api #服务的名称
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.127.121:3306/xc166_content?serverTimezone=UTC&userUnicode=true&useSSL=false&
-    username: root
-    password: 123456
-
-
+    name: content-api
+  cloud:
+    nacos:
+      server-addr: 192.168.1.100:8848
+      discovery:
+        namespace: dev
+        group: xuecheng-plus-project
+      config:
+        namespace: dev
+        group: xuecheng-plus-project
+        file-extension: yaml
+        refresh-enabled: true
+        server-addr: 192.168.1.100:8848
+  profiles:
+    active: dev
 # 日志文件配置路径
 logging:
   config: classpath:log4j2-dev.xml
-
 
 
 swagger:
