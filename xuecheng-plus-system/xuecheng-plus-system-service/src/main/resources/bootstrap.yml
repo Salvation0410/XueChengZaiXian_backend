@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: system-service
+  cloud:
+    nacos:
+      server-addr: 192.168.1.100:8848
+      config:
+        namespace: dev
+        group: xuecheng-plus-project
+        file-extension: yaml
+        refresh-enabled: true
+  profiles:
+    active: dev
