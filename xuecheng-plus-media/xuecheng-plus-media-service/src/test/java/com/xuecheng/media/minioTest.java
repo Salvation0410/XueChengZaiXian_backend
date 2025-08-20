@@ -2,20 +2,22 @@ package com.xuecheng.media;
 
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
-import io.minio.GetObjectArgs;
-import io.minio.MinioClient;
-import io.minio.RemoveObjectArgs;
-import io.minio.UploadObjectArgs;
+import io.minio.*;
+import io.minio.errors.*;
+import io.minio.messages.Source;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilterInputStream;
+import java.io.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @ClassName minioTest
@@ -28,7 +30,7 @@ import java.io.FilterInputStream;
 public class minioTest {
     MinioClient minioClient =
             MinioClient.builder()
-                    .endpoint("http://192.168.1.100:9000")
+                    .endpoint("http://172.24.224.1:9000")
                     .credentials("minioadmin", "minioadmin")
                     .build();
 
@@ -91,5 +93,53 @@ public class minioTest {
         if (source_md5.equals(local_md5)) {
             System.out.println("下载成功");
         }
+    }
+    //上传分块文件到minio
+    @Test
+    public void uploadChunk() throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        for (int i = 0; i < 10; i++){
+            //上传文件的参数信息
+            UploadObjectArgs uploadObjectArgs = UploadObjectArgs.builder()
+                    .bucket("testbucket")//桶名称
+                    .filename("D:\\TOOLS\\minio\\test_video\\chunk\\"+i) //指定本地文件路径
+                    .object("chunk/"+i)//对象名 放在子目 录下
+                    .build();
+
+            //上传文件
+            minioClient.uploadObject(uploadObjectArgs);
+            System.out.println("上传分块文件"+i+"成功");
+        }
+    }
+    //调用minio接口合并分块文件
+    @Test
+    public void testMerge() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        //创建源文件列表
+
+        //普通循环写法
+        /*List<ComposeSource> sourceList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            ComposeSource composeSource = ComposeSource
+                    .builder()
+                    .bucket("testbucket")
+                    .object("chunk/"+i)
+                    .build();
+            sourceList.add(composeSource);
+        }*/
+        //采用流式写法
+        List<ComposeSource> sourceList= Stream.iterate(0,i->++i).limit(10).map(i->
+                ComposeSource.builder().
+                        bucket("testbucket").
+                        object("chunk/"+i).build()).
+                        collect(Collectors.toList());
+
+        //指定合并后的objectName等信息
+        ComposeObjectArgs composeObjectArgs = ComposeObjectArgs.builder()
+                .bucket("testbucket")
+                .object("merge01.mp4")
+                .sources(sourceList) //指定源文件信息
+                .build();
+
+        //合并文件
+        minioClient.composeObject(composeObjectArgs);
     }
 }
