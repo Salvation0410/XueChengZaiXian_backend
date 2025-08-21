@@ -2,6 +2,7 @@ package com.xuecheng.media.service;
 
 import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
+import com.xuecheng.base.model.RestResponse;
 import com.xuecheng.media.model.dto.QueryMediaParamsDto;
 import com.xuecheng.media.model.dto.UploadFileParamsDto;
 import com.xuecheng.media.model.dto.UploadFileResultDto;
@@ -39,5 +40,45 @@ public interface MediaFileService {
  */
  public UploadFileResultDto uploadFile(Long companyId, UploadFileParamsDto uploadFileParamsDto,String localFilePath);
 
+ /**
+  * @description 将文件信息添加到数据库
+  * @param companyId 机构id
+  * @param fileMd5 文件md5值
+  * @param uploadFileParamsDto 文件信息
+  * @param bucket 文件所属的桶
+  * @param objectName 文件在桶中的名称
+  * @return com.xuecheng.media.model.po.MediaFiles
+  * @author huang
+  * @date 2025 /8/19
+ */
  public MediaFiles addMediaFilesToDb(Long companyId,String fileMd5,UploadFileParamsDto uploadFileParamsDto,String bucket,String objectName);
+
+ /**
+  * @description 检查文件是否存在
+  * @param fileMd5 文件的md5
+  * @return com.xuecheng.base.model.RestResponse<java.lang.Boolean> false不存在，true存在
+  * @author Mr.M
+  * @date 2022/9/13 15:38
+  */
+ public RestResponse<Boolean> checkFile(String fileMd5);
+ /**
+  * @description 检查分块文件
+  * @param fileMd5 文件md5值
+  * @param chunkIndex 分块序号
+  * @return boolean
+  * @author huang
+  * @date 2025 /8/19
+ */
+ public RestResponse<Boolean> checkChunk(String fileMd5,int chunkIndex);
+
+ /**
+  * @description 上传分块文件
+  * @param localChunkFilePath 分块文件的路径
+  * @param fileMd5 文件md5值
+  * @param chunkIndex 分块序号
+  * @return com.xuecheng.base.model.RestResponse
+  * @author huang
+  * @date 2025 /8/19
+ */
+ public RestResponse uploadChunk(String fileMd5,int chunkIndex,String localChunkFilePath);
 }

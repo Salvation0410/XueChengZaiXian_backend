@@ -7,12 +7,14 @@ import com.j256.simplemagic.ContentInfoUtil;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
+import com.xuecheng.base.model.RestResponse;
 import com.xuecheng.media.mapper.MediaFilesMapper;
 import com.xuecheng.media.model.dto.QueryMediaParamsDto;
 import com.xuecheng.media.model.dto.UploadFileParamsDto;
 import com.xuecheng.media.model.dto.UploadFileResultDto;
 import com.xuecheng.media.model.po.MediaFiles;
 import com.xuecheng.media.service.MediaFileService;
+import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.UploadObjectArgs;
 import io.minio.errors.*;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -107,7 +110,7 @@ public class MediaFileServiceImpl implements MediaFileService {
   String FileName = uploadFileParamsDto.getFilename();
   //获取文件扩展名
   String extensionName = StringUtils.substringAfterLast(FileName, ".");
-  String mimeType = getMimeType(extensionName);
+  String mimeType = getMineType(extensionName);
 
   //获取本地文件路径 拼接存储路径信息并存到数据库中 文件的存储路径-> 2022/09/01/xxxx.png
   String fileMd5 = getFileMd5(new File(localFilePath));
@@ -156,7 +159,7 @@ public class MediaFileServiceImpl implements MediaFileService {
   return false;
  }
 
- private  String getMimeType(String extension) {
+ private  String getMineType(String extension) {
        //通过扩展名得到媒体资源类型 mimeType
        //根据扩展名取出mimeType
      if(extension == null){
@@ -219,5 +222,87 @@ public class MediaFileServiceImpl implements MediaFileService {
   }
   return mediaFiles;
 
+ }
+ /*
+ * 检查文件是否存在
+ * */
+ @Override
+ public RestResponse<Boolean> checkFile(String fileMd5) {
+  //先查询数据库
+  MediaFiles mediaFiles = mediaFilesMapper.selectById(fileMd5);
+  if(mediaFiles!=null){
+   //获取桶名称
+   String Bucket = mediaFiles.getBucket();
+   //objectName
+   String filePath = mediaFiles.getFilePath();
+   //如果数据库存在文件信息 查询minio
+   GetObjectArgs getObjectArgs = GetObjectArgs.builder()
+           .bucket(Bucket)
+           .object(filePath)
+           .build();
+
+   try {
+    //获取一个远程输入流
+    FilterInputStream inputStream = minioClient.getObject(getObjectArgs);
+    if (inputStream!=null){
+     //文件已经存在
+     return RestResponse.success(true);
+    }
+   } catch (Exception e) {
+     e.printStackTrace();
+   }
+  }
+  //文件不存在
+  return RestResponse.success(false);
+ }
+
+ /*
+ *检查分块序号
+ * */
+ @Override
+ public RestResponse<Boolean> checkChunk(String fileMd5, int chunkIndex) {
+
+  //objectName
+  String chunkFilePath = getChunkFileFolderPath(fileMd5);
+  //查询minio
+  GetObjectArgs getObjectArgs = GetObjectArgs.builder()
+          .bucket(bucket_video)
+          .object(chunkFilePath+chunkIndex)
+          .build();
+
+  try {
+   //获取一个远程输入流
+   FilterInputStream inputStream = minioClient.getObject(getObjectArgs);
+   if (inputStream!=null){
+    //文件已经存在
+    return RestResponse.success(true);
+   }
+  } catch (Exception e) {
+   e.printStackTrace();
+  }
+  //文件不存在
+  return RestResponse.success(false);
+ }
+
+ /*
+ * 上传分块文件
+ * */
+ @Override
+ public RestResponse uploadChunk(String fileMd5, int chunkIndex, String localChunkFilePath) {
+  //获取分块文件的路径
+  String chunkFilePath = getChunkFileFolderPath(fileMd5)+chunkIndex;
+  //获取mineType 这里getMine是对空字符串进行了处理 将其转为了未知流
+  String mimeType = getMineType(null);
+  //上传文件到minio
+  boolean b = addMediaFilesToMinIO(localChunkFilePath,mimeType,bucket_video,chunkFilePath);
+  if(!b){
+   return RestResponse.validfail(false,"上传分块文件失败");
+  }
+  return RestResponse.success(true);
+ }
+
+ //获取分块文件的目录
+ private String getChunkFileFolderPath(String fileMd5) {
+  return fileMd5.substring(0,1) + "/" + fileMd5.substring(1,2) + "/" + fileMd5 + "/" + "chunks" + "/";
  }
 }
