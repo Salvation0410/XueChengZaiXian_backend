@@ -81,4 +81,16 @@ public interface MediaFileService {
   * @date 2025 /8/19
  */
  public RestResponse uploadChunk(String fileMd5,int chunkIndex,String localChunkFilePath);
+
+ /**
+  * @description 合并分块
+  * @param companyId  机构id
+  * @param fileMd5  文件md5
+  * @param chunkTotal 分块总和
+  * @param uploadFileParamsDto 文件信息
+  * @return com.xuecheng.base.model.RestResponse
+  * @author Mr.M/
+  * @date 2025 /8/19
+  */
+ public RestResponse mergeChunks(Long companyId,String fileMd5,int chunkTotal,UploadFileParamsDto uploadFileParamsDto);
 }
