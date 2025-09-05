@@ -476,7 +476,7 @@ public class MediaFileServiceImpl implements MediaFileService {
   * @param fileExt 文件扩展名
   * @return
   * */
- private  String getFilePathByMd5(String fileMd5,String fileExt) {
+ public   String getFilePathByMd5(String fileMd5,String fileExt) {
   return fileMd5.substring(0,1) + "/" + fileMd5.substring(1,2) + "/" + fileMd5 + "/"+fileMd5 + fileExt;
  }
 }
