@@ -19,7 +19,7 @@ public interface MediaProcessMapper extends BaseMapper<MediaProcess> {
     /*
     * 根据shardIndex和shardTotal查询待处理任务
     * */
-    @Select("select * from media_process t where t.id % #{shardTotal} = #{shardIndex} and (t.status=1 or t.status = 3) and t.fail_count<3 limit #{conut}")
+    @Select("select * from media_process t where t.id % #{shardTotal} = #{shardIndex} and (t.status=1 or t.status = 3) and t.fail_count < 3 limit #{count}")
     List<MediaProcess> selectListByShardIndex(@Param("shardIndex") int shardIndex, @Param("shardTotal") int shardTotal, @Param("count") int count);
 
 

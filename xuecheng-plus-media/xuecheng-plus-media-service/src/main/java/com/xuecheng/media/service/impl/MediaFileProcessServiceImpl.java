@@ -1,9 +1,7 @@
 package com.xuecheng.media.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
 import com.xuecheng.media.mapper.MediaFilesMapper;
 import com.xuecheng.media.mapper.MediaProcessHistoryMapper;
 import com.xuecheng.media.mapper.MediaProcessMapper;
@@ -67,6 +65,9 @@ public class MediaFileProcessServiceImpl implements MediaFileProcessService {
         if(mediaProcess == null){
             return;
         }
+
+        LocalDateTime now = LocalDateTime.now();
+
         //1.任务执行失败
         if(status.equals("3")){
             //1.1 更新mediaProcess表中数据
@@ -77,13 +78,15 @@ public class MediaFileProcessServiceImpl implements MediaFileProcessService {
             mediaProcessMapper.updateById(mediaProcess);*/
 
             //写法2 使用mp
+            // 使用原子操作直接增加失败次数，避免并发问题
             LambdaUpdateWrapper<MediaProcess> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.set(MediaProcess::getStatus,"3")
-                    .set(MediaProcess::getFailCount,mediaProcess.getFailCount()+1)
-                    .set(MediaProcess::getErrormsg,errorMsg)
-                    .eq(MediaProcess::getId,taskId);
+            updateWrapper.set(MediaProcess::getStatus, "3")
+                    .setSql("fail_count = fail_count + 1") // 使用SQL表达式原子增加
+                    .set(MediaProcess::getErrormsg, errorMsg)
+                    .eq(MediaProcess::getId, taskId);
 
-            mediaProcessMapper.update(null,updateWrapper);
+            mediaProcessMapper.update(null, updateWrapper);
+            log.debug("更新任务处理状态为失败，任务ID:{}", taskId);
         }
 
 
@@ -94,10 +97,10 @@ public class MediaFileProcessServiceImpl implements MediaFileProcessService {
         //2.1.2 设置url
         mediaFiles.setUrl(url);
         mediaFilesMapper.updateById(mediaFiles);
-        //2.2更新MediaFiles表状态
+        //2.2更新MediaFiles表状态 TODO 设置完成时间失败 需完善
         LambdaUpdateWrapper<MediaProcess> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.set(MediaProcess::getStatus,"2")
-                .set(MediaProcess::getFinishDate, LocalDateTime.now())
+                .set(MediaProcess::getFinishDate,LocalDateTime.now())
                 .set(MediaProcess::getUrl,url)
                 .eq(MediaProcess::getId,taskId);
         mediaProcessMapper.update(null,updateWrapper);
@@ -105,6 +108,8 @@ public class MediaFileProcessServiceImpl implements MediaFileProcessService {
         //2.3将MediaProcess表中记录插入到历史表中
         MediaProcessHistory mediaProcessHistory = new MediaProcessHistory();
         BeanUtils.copyProperties(mediaProcess,mediaProcessHistory);
+        //插入时间 ??? 原先拷贝完成时间为空值
+        mediaProcessHistory.setFinishDate(now);
         mediaProcessHistoryMapper.insert(mediaProcessHistory);
 
         //2.4删除MediaProcess表中记录

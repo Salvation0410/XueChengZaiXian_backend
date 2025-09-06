@@ -100,8 +100,9 @@ public class VideoTask {
                     File file = mediaFileService.downloadFileFromMinIO(bucket, objectName);
                     if (file == null) {
                         log.debug("下载视频失败，bucket:{},objectName:{},任务id:{}",bucket,objectName, taskId);
+                        String truncatedError = truncateErrorMessage("下载视频到本地失败", 255);
                         //保存视频下载失败的结果
-                        mediaFileProcessService.saveProcessFinishStatus(taskId, "3", fileId, null, "下载视频到本地失败");
+                        mediaFileProcessService.saveProcessFinishStatus(taskId, "3", fileId, null, truncatedError);
                         return;
                     }
 
@@ -118,8 +119,10 @@ public class VideoTask {
                         mp4File = File.createTempFile("minio", ".mp4");
                     } catch (IOException e) {
                         log.debug("创建临时文件失败，任务id:{}", taskId);
+                        String errorMsg = "创建临时文件失败: " + e.getMessage();
+                        String truncatedError = truncateErrorMessage(errorMsg, 255);
                         //保存任务处理结果
-                        mediaFileProcessService.saveProcessFinishStatus(taskId, "3", fileId, null, "创建临时文件失败");
+                        mediaFileProcessService.saveProcessFinishStatus(taskId, "3", fileId, null, truncatedError);
                         return;
                     }
 
@@ -130,7 +133,9 @@ public class VideoTask {
                     String s = videoUtil.generateMp4();
                     if (!s.equals("success")) {
                         log.debug("视频转换失败，原因{}，bucket:{}任务id:{}", s, bucket, taskId);
-                        mediaFileProcessService.saveProcessFinishStatus(taskId, "3", fileId, null, s);
+                        // 对FFmpeg的错误输出进行截断
+                        String truncatedError = truncateErrorMessage(s, 255);
+                        mediaFileProcessService.saveProcessFinishStatus(taskId, "3", fileId, null, truncatedError);
                         return;
                     }
 
@@ -139,7 +144,9 @@ public class VideoTask {
                     boolean b1 = mediaFileService.addMediaFilesToMinIO(mp4File.getAbsolutePath(), "video/mp4", bucket, objectName);
                     if (!b1) {
                         log.debug("上传视频失败，任务id:{}", taskId);
-                        mediaFileProcessService.saveProcessFinishStatus(taskId, "3", fileId, null, "上传MP4视频到minio失败");
+                        // 对错误信息进行截断
+                        String truncatedError = truncateErrorMessage("上传MP4视频到minio失败", 255);
+                        mediaFileProcessService.saveProcessFinishStatus(taskId, "3", fileId, null, truncatedError);
                         return;
                     }
 
@@ -157,6 +164,17 @@ public class VideoTask {
         //阻塞线程 指定最大限制的等待时间 阻塞最多等待一定的时间后就解除阻塞
         countDownLatch.await(30, TimeUnit.MINUTES);
 
+    }
+
+    /*
+    * 截断错误信息 当前任务错误信息太长超过数据库字段的限制
+    * */
+    private String truncateErrorMessage(String fullError, int maxLength) {
+        if (fullError == null || fullError.length() <= maxLength) {
+            return fullError;
+        }
+        // 只保留前maxLength个字符，并添加省略号
+        return fullError.substring(0, maxLength - 3) + "...";
     }
 
 
