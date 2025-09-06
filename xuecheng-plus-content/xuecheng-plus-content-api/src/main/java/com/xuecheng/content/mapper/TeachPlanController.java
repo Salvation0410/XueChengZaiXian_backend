@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * @ClassName TeachPlanController
  * @Description 课程计划管理模块相关接口
- * @Author
+ * @Author huang
  * @Date 2025/8/14
  */
 
@@ -68,7 +68,7 @@ public class TeachPlanController {
     @ApiOperation(value = "课程计划和媒资信息绑定")
     @PostMapping("/teachplan/association/media")
     public void associationMedia(@RequestBody BindTeachPlanMediaDto bindTeachPlanMediaDto){
-
+        teachplanService.associationMedia(bindTeachPlanMediaDto);
     }
 
 }
