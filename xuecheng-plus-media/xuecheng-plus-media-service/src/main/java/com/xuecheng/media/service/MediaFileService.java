@@ -117,4 +117,10 @@ public interface MediaFileService {
   * @return
   * */
  public String getFilePathByMd5(String fileMd5,String fileExt);
+
+ /*
+ * 根据媒资文件id查询相应课程计划
+ *
+ * */
+ MediaFiles getFileById(String mediaId);
 }

@@ -1,0 +1,40 @@
+package com.xuecheng.content.mapper;
+
+import com.xuecheng.content.model.dto.CoursePreviewDto;
+import com.xuecheng.content.service.CoursePublishService;
+import io.swagger.annotations.Api;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.servlet.ModelAndView;
+
+/**
+ * @ClassName CoursePublishController
+ * @Description 课程发布相关接口
+ * @Author huang
+ * @Date 2025/9/7 9:16
+ */
+
+// RestController注解响应json数据 Controller响应页面
+@Controller
+@Slf4j
+@Api(tags = "课程发布相关接口")
+@RequiredArgsConstructor
+public class CoursePublishController {
+
+    private final CoursePublishService coursePublishService;
+
+    @GetMapping("/coursepreview/{courseId}")
+    public ModelAndView preview(@PathVariable("courseId") Long courseId){
+        ModelAndView modelAndView = new ModelAndView();
+        //查询到的课程信息作为模板数据
+        CoursePreviewDto coursePreviewInfo = coursePublishService.getCoursePreviewInfo(courseId);
+        //指定模型
+        modelAndView.addObject("model",coursePreviewInfo);
+        //指定模板
+        modelAndView.setViewName("course_template");    //根据视图名称加nacos中配置的后缀拼接找到模板(+.html)
+        return modelAndView;
+    }
+}

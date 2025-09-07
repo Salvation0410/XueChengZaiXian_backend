@@ -50,6 +50,7 @@ import static io.netty.handler.codec.http.HttpUtil.getMimeType;
  @Slf4j
 public class MediaFileServiceImpl implements MediaFileService {
 
+
   @Autowired
  MediaFilesMapper mediaFilesMapper;
 
@@ -478,5 +479,11 @@ public class MediaFileServiceImpl implements MediaFileService {
   * */
  public   String getFilePathByMd5(String fileMd5,String fileExt) {
   return fileMd5.substring(0,1) + "/" + fileMd5.substring(1,2) + "/" + fileMd5 + "/"+fileMd5 + fileExt;
+ }
+
+ @Override
+ public MediaFiles getFileById(String mediaId) {
+  MediaFiles mediaFiles = mediaFilesMapper.selectById(mediaId);
+  return mediaFiles;
  }
 }
