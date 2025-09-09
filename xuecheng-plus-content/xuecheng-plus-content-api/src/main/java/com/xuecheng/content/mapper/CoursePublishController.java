@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -26,6 +28,9 @@ public class CoursePublishController {
 
     private final CoursePublishService coursePublishService;
 
+    /*
+    * 课程预览
+    * */
     @GetMapping("/coursepreview/{courseId}")
     public ModelAndView preview(@PathVariable("courseId") Long courseId){
         ModelAndView modelAndView = new ModelAndView();
@@ -37,4 +42,16 @@ public class CoursePublishController {
         modelAndView.setViewName("course_template");    //根据视图名称加nacos中配置的后缀拼接找到模板(+.html)
         return modelAndView;
     }
+
+    /*
+    * 课程审核
+    * */
+    @ResponseBody
+    @PostMapping("/courseaudit/commit/{courseId}")
+    public void commitAudit(@PathVariable("courseId") Long courseId){
+        Long companyId = 1232141425L;
+        coursePublishService.commitAudit(companyId,courseId);
+    }
+
+
 }
