@@ -39,7 +39,7 @@ public interface MediaFileService {
   * @author huang
   * @date 2025 /8/19
  */
- public UploadFileResultDto uploadFile(Long companyId, UploadFileParamsDto uploadFileParamsDto,String localFilePath);
+ public UploadFileResultDto uploadFile(Long companyId, UploadFileParamsDto uploadFileParamsDto,String localFilePath,String objectName);
 
  /**
   * @description 将文件信息添加到数据库

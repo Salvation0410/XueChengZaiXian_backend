@@ -59,7 +59,13 @@
             <artifactId>okhttp</artifactId>
             <version>4.8.1</version>
         </dependency>
-
+        <!-- Spring Boot 集成 Junit -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
 
 </project>

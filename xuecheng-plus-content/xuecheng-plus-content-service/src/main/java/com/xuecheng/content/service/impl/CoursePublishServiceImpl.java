@@ -2,21 +2,18 @@ package com.xuecheng.content.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.xuecheng.base.exception.CommonError;
 import com.xuecheng.base.exception.XueChengPlusException;
-import com.xuecheng.content.mapper.CourseBaseMapper;
-import com.xuecheng.content.mapper.CourseMarketMapper;
-import com.xuecheng.content.mapper.CoursePublishPreMapper;
-import com.xuecheng.content.mapper.CourseTeacherMapper;
+import com.xuecheng.content.mapper.*;
 import com.xuecheng.content.model.dto.CourseBaseInfoDto;
 import com.xuecheng.content.model.dto.CoursePreviewDto;
 import com.xuecheng.content.model.dto.TeachplanDto;
-import com.xuecheng.content.model.po.CourseBase;
-import com.xuecheng.content.model.po.CourseMarket;
-import com.xuecheng.content.model.po.CoursePublishPre;
-import com.xuecheng.content.model.po.CourseTeacher;
+import com.xuecheng.content.model.po.*;
 import com.xuecheng.content.service.CourseBaseInfoService;
 import com.xuecheng.content.service.CoursePublishService;
 import com.xuecheng.content.service.TeachplanService;
+import com.xuecheng.messagesdk.model.po.MqMessage;
+import com.xuecheng.messagesdk.service.MqMessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -50,6 +47,10 @@ public class CoursePublishServiceImpl implements CoursePublishService {
     private final CourseMarketMapper courseMarketMapper;
 
     private final CourseTeacherMapper courseTeacherMapper;
+
+    private final CoursePublishMapper coursePublishMapper;
+
+    private final MqMessageService mqMessageService;
 
 
 
@@ -133,6 +134,51 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         courseBase.setAuditStatus("202003");
         //更新
         courseBaseMapper.updateById(courseBase);
+    }
+
+    /*
+    * 发布课程
+    * */
+    @Override
+    public void publish(Long companyId, Long courseId) {
+        //查询预发布表数据
+        CoursePublishPre coursePublishPre = coursePublishPreMapper.selectById(courseId);
+        //状态校验 ->没有审核通过不允许发布
+        String status = coursePublishPre.getStatus();
+        if(!status.equals("202004")){
+            XueChengPlusException.cast("课程没有审核通过不允许发布");
+        }
+        //复制课程信息到发布表
+        CoursePublish coursePublish = new CoursePublish();
+        BeanUtils.copyProperties(coursePublishPre,coursePublish);
+        //查询发布表 有则更新 没有则插入
+        CoursePublish coursePublishDB = coursePublishMapper.selectById(courseId);
+        if(coursePublishDB == null){
+            coursePublishMapper.insert(coursePublish);
+        }else{
+            coursePublishMapper.updateById(coursePublish);
+        }
+
+        //写入消息表 使用消息 sdk工具包实现
+        saveCoursePublishMessage(courseId);
+        //删除预发布表数据
+        coursePublishPreMapper.deleteById(courseId);
+
+
+    }
+
+    /**
+     * @description 保存消息表记录
+     * @param courseId  课程id
+     * @return void
+     * @author huang
+     * @date 2025.9.10
+     */
+    private void saveCoursePublishMessage(Long courseId){
+        MqMessage mqMessage = mqMessageService.addMessage("course_publish", String.valueOf(courseId), null, null);
+        if(mqMessage==null){
+            XueChengPlusException.cast(CommonError.UNKOWN_ERROR);
+        }
     }
 
 
