@@ -1,13 +1,18 @@
 package com.xuecheng.content.jobHandler;
 
+import com.xuecheng.base.exception.XueChengPlusException;
+import com.xuecheng.content.service.CoursePublishService;
 import com.xuecheng.messagesdk.model.po.MqMessage;
 import com.xuecheng.messagesdk.service.MessageProcessAbstract;
 import com.xuecheng.messagesdk.service.MqMessageService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -21,6 +26,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class CoursePublishTask extends MessageProcessAbstract {
+
+    @Autowired
+    CoursePublishService coursePublishService;
 
     public CoursePublishTask(MqMessageService mqMessageService) {
         super(mqMessageService);
@@ -76,6 +84,12 @@ public class CoursePublishTask extends MessageProcessAbstract {
             return;
         }
         //开始进行课程静态化操作 TODO
+        File file = coursePublishService.generateCourseHtml(courseId);
+        if(file == null){
+            XueChengPlusException.cast("生成静态化页面为空");
+        }
+        //将生成的html文件上传到Minio
+        coursePublishService.uploadCourseHtml(courseId,file);
 
         //任务完成 更改任务的执行状态
         mqMessageService.completedStageOne(taskId);

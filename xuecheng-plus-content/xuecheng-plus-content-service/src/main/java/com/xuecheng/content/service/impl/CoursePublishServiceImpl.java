@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xuecheng.base.exception.CommonError;
 import com.xuecheng.base.exception.XueChengPlusException;
+import com.xuecheng.content.config.MultipartSupportConfig;
+import com.xuecheng.content.feignClient.MediaServiceClient;
 import com.xuecheng.content.mapper.*;
 import com.xuecheng.content.model.dto.CourseBaseInfoDto;
 import com.xuecheng.content.model.dto.CoursePreviewDto;
@@ -14,14 +16,23 @@ import com.xuecheng.content.service.CoursePublishService;
 import com.xuecheng.content.service.TeachplanService;
 import com.xuecheng.messagesdk.model.po.MqMessage;
 import com.xuecheng.messagesdk.service.MqMessageService;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -51,6 +62,8 @@ public class CoursePublishServiceImpl implements CoursePublishService {
     private final CoursePublishMapper coursePublishMapper;
 
     private final MqMessageService mqMessageService;
+
+    private final MediaServiceClient mediaServiceClient;
 
 
 
@@ -141,6 +154,7 @@ public class CoursePublishServiceImpl implements CoursePublishService {
     * */
     @Override
     public void publish(Long companyId, Long courseId) {
+
         //查询预发布表数据
         CoursePublishPre coursePublishPre = coursePublishPreMapper.selectById(courseId);
         //状态校验 ->没有审核通过不允许发布
@@ -165,6 +179,72 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         coursePublishPreMapper.deleteById(courseId);
 
 
+    }
+    /*
+    * 课程页面静态化
+    * */
+    @Override
+    public File generateCourseHtml(Long courseId) {
+        //最终的静态化页面文件
+        File htmlFile = null;
+
+        try{
+            //创建配置对象
+            Configuration configuration = new Configuration(Configuration.getVersion());
+
+            //获取资源文件路径
+            String classPath = this.getClass().getResource("/").getPath();
+            //指定模板的目录
+            configuration.setDirectoryForTemplateLoading(new File(classPath+"/templates/"));
+            //指定编码格式
+            configuration.setDefaultEncoding("utf-8");
+
+            //获取模板
+            Template template = configuration.getTemplate("course_template.html");
+            //准备页面数据
+            CoursePreviewDto coursePreviewDto = this.getCoursePreviewInfo(courseId);
+            //封装后端数据 与前端访问的数据一致
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("model",coursePreviewDto);
+
+            //使用FreeMarKer工具类对页面进行静态化
+            String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, map);
+            //将字符串转化成流 输出到文件中
+            //输入流
+            InputStream inputStream = IOUtils.toInputStream(html, "utf-8");
+            //创建临时文件
+             htmlFile = File.createTempFile("coursePublish",".html");
+            //输出文件 这里仅仅做测试 输出的文件规则为id+后缀
+            FileOutputStream outputStream = new FileOutputStream(htmlFile);
+            //拷贝文件 将html写入到文件中
+            IOUtils.copy(inputStream,outputStream);
+        } catch (Exception e){
+            log.info("课程页面静态化出现问题，课程id：{}",courseId);
+            e.printStackTrace();
+        }
+
+        return htmlFile;
+    }
+
+    /*
+    * 上传静态化页面的文件
+    * */
+    @Override
+    public void uploadCourseHtml(Long courseId, File file) {
+       try{
+           //将file文件转成MultipartFile
+           MultipartFile multipartFile = MultipartSupportConfig.getMultipartFile(file);
+            //远程调用得到返回值
+           String upload = mediaServiceClient.upload(multipartFile,"course/"+courseId+".html");
+           if(upload == null){
+               log.debug("远程调用走降级逻辑得到上传的结果为null");
+               XueChengPlusException.cast("上传静态化页面文件失败");
+           }
+       }catch (Exception e){
+           log.info("上传静态化页面文件失败，课程id：{}",courseId);
+           XueChengPlusException.cast("上传静态化页面文件失败");
+           e.printStackTrace();
+       }
     }
 
     /**

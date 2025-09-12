@@ -18,8 +18,8 @@ import java.io.IOException;
 * 说明:接口类型为你所需要远程调用的接口类型
 *
 * */
-    @Component
-    @Slf4j
+@Component
+@Slf4j
 public class MediaServiceClientFallbackFactory implements FallbackFactory<MediaServiceClient> {
 
     //通过这种方法 可以拿到熔断的异常信息 throwable
