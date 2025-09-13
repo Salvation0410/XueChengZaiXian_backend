@@ -1,6 +1,10 @@
 package com.xuecheng.content.jobHandler;
 
 import com.xuecheng.base.exception.XueChengPlusException;
+import com.xuecheng.content.feignClient.CourseIndex;
+import com.xuecheng.content.feignClient.SearchServiceClient;
+import com.xuecheng.content.mapper.CoursePublishMapper;
+import com.xuecheng.content.model.po.CoursePublish;
 import com.xuecheng.content.service.CoursePublishService;
 import com.xuecheng.messagesdk.model.po.MqMessage;
 import com.xuecheng.messagesdk.service.MessageProcessAbstract;
@@ -9,6 +13,7 @@ import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +34,12 @@ public class CoursePublishTask extends MessageProcessAbstract {
 
     @Autowired
     CoursePublishService coursePublishService;
+
+    @Autowired
+    SearchServiceClient searchServiceClient;
+
+    @Autowired
+    CoursePublishMapper coursePublishMapper;
 
     public CoursePublishTask(MqMessageService mqMessageService) {
         super(mqMessageService);
@@ -109,7 +120,19 @@ public class CoursePublishTask extends MessageProcessAbstract {
             log.debug("保存课程索引信息已完成 无需处理");
             return;
         }
-        //
+        //查询课程信息 远程调用搜索服务添加索引接口
+
+        //1.从课程发布表查询课程信息
+        CoursePublish coursePublish = coursePublishMapper.selectById(courseId);
+        CourseIndex courseIndex = new CourseIndex();
+        BeanUtils.copyProperties(coursePublish,courseIndex);
+        //2.远程调用接口
+        Boolean add = searchServiceClient.add(courseIndex);
+        if(add ==  false){
+            XueChengPlusException.cast("远程调用课程添加索引服务失败");
+
+        }
+
 
         //任务完成 更新任务执行状态
         mqMessageService.completedStageTwo(taskId);

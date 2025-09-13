@@ -36,11 +36,19 @@ public class IndexServiceImpl implements IndexService {
  @Autowired
  RestHighLevelClient client;
 
+ /*
+ * @param indexName 索引名称
+ * @param id 文档id
+ * @param object 索引数据对象
+ * */
  @Override
  public Boolean addCourseIndex(String indexName,String id,Object object) {
+  //准备json文档
   String jsonString = JSON.toJSONString(object);
+  // 原dsl语句：POST /course_index/doc/1 course_index ->索引库名 doc ->文档类型 1 ->文档id
+  //创建索引请求对象
   IndexRequest indexRequest = new IndexRequest(indexName).id(id);
-  //指定索引文档内容
+  //设置请求源 并说明数据格式
   indexRequest.source(jsonString,XContentType.JSON);
   //索引响应对象
   IndexResponse indexResponse = null;
@@ -51,8 +59,10 @@ public class IndexServiceImpl implements IndexService {
    e.printStackTrace();
    XueChengPlusException.cast("添加索引出错");
   }
+  // getResult ->从相应结果中获取本次操作的结果类型枚举 .name() 将这个枚举值转为对应的字符串名称
   String name = indexResponse.getResult().name();
   System.out.println(name);
+  // equalsIgnoreCase ->忽略大小写比较字符串
   return name.equalsIgnoreCase("created") || name.equalsIgnoreCase("updated");
 
  }
@@ -62,6 +72,7 @@ public class IndexServiceImpl implements IndexService {
 
   String jsonString = JSON.toJSONString(object);
   UpdateRequest updateRequest = new UpdateRequest(indexName, id);
+  //UpdateRequest.doc() ->设置文档数据 仅修改部分文档 IndexRequest.source() ->设置文档数据 替换整个文档
   updateRequest.doc(jsonString, XContentType.JSON);
   UpdateResponse updateResponse = null;
   try {
@@ -71,6 +82,8 @@ public class IndexServiceImpl implements IndexService {
    e.printStackTrace();
    XueChengPlusException.cast("更新索引出错");
   }
+  // DocWriteResponse ->文档操作结果 无需解析json 是IndexResponse UpdateResponse DeleteResponse的父类
+  //这里跟上面方法一样 是拿到本次操作类型的枚举值
   DocWriteResponse.Result result = updateResponse.getResult();
   return result.name().equalsIgnoreCase("updated");
 
