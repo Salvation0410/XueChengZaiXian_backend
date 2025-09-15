@@ -1,4 +1,4 @@
-package com.xuecheng.content.mapper;
+package com.xuecheng.content.api;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

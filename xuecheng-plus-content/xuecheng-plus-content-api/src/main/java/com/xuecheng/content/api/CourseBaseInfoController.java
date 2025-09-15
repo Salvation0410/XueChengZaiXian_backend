@@ -1,4 +1,4 @@
-package com.xuecheng.content.mapper;
+package com.xuecheng.content.api;
 
 import com.xuecheng.base.exception.ValidationGroups;
 import com.xuecheng.base.model.PageParams;

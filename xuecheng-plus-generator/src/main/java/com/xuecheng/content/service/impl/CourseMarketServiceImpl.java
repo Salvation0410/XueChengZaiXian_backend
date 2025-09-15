@@ -1,7 +1,7 @@
 package com.xuecheng.content.service.impl;
 
 import com.xuecheng.content.model.po.CourseMarket;
-import com.xuecheng.content.mapper.CourseMarketMapper;
+import com.xuecheng.content.api.CourseMarketMapper;
 import com.xuecheng.content.service.CourseMarketService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;

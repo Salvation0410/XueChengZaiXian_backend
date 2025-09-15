@@ -1,6 +1,6 @@
 package com.xuecheng.contentTest;
 
-import com.xuecheng.content.mapper.CourseCategoryMapper;
+import com.xuecheng.content.api.CourseCategoryMapper;
 import com.xuecheng.content.model.po.CourseCategory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

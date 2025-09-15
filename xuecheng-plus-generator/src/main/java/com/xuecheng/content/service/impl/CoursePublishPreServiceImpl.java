@@ -1,7 +1,7 @@
 package com.xuecheng.content.service.impl;
 
 import com.xuecheng.content.model.po.CoursePublishPre;
-import com.xuecheng.content.mapper.CoursePublishPreMapper;
+import com.xuecheng.content.api.CoursePublishPreMapper;
 import com.xuecheng.content.service.CoursePublishPreService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;

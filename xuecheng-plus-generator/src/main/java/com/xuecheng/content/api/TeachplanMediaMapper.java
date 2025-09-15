@@ -1,10 +1,7 @@
-package com.xuecheng.content.mapper;
+package com.xuecheng.content.api;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.xuecheng.content.model.dto.TeachplanDto;
 import com.xuecheng.content.model.po.TeachplanMedia;
-
-import java.util.List;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
  * <p>

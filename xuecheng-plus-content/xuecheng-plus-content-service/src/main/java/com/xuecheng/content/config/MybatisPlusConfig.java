@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
  * @date 2023/2/12 9:23
  */
 @Configuration
-@MapperScan("com.xuecheng.content.mapper")
+@MapperScan("com.xuecheng.content.api")
 public class MybatisPlusConfig {
  /**
   * 定义分页拦截器

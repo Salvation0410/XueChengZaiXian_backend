@@ -1,7 +1,6 @@
 package com.xuecheng.content.service.impl;
 
-import com.sun.xml.internal.bind.v2.TODO;
-import com.xuecheng.content.mapper.CourseCategoryMapper;
+import com.xuecheng.content.api.CourseCategoryMapper;
 import com.xuecheng.content.model.dto.CourseCategoryTreeDto;
 import com.xuecheng.content.service.CourseCategoryService;
 import lombok.extern.slf4j.Slf4j;

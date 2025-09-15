@@ -1,4 +1,4 @@
-package com.xuecheng.content.mapper;
+package com.xuecheng.content.api;
 
 import com.xuecheng.content.model.dto.CoursePreviewDto;
 import com.xuecheng.content.service.CourseBaseInfoService;

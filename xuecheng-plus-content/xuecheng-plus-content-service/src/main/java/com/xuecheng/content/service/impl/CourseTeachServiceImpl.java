@@ -2,7 +2,7 @@ package com.xuecheng.content.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xuecheng.base.exception.XueChengPlusException;
-import com.xuecheng.content.mapper.CourseTeacherMapper;
+import com.xuecheng.content.api.CourseTeacherMapper;
 import com.xuecheng.content.model.po.CourseTeacher;
 import com.xuecheng.content.service.CourseTeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
