@@ -94,7 +94,7 @@ public class CoursePublishTask extends MessageProcessAbstract {
             log.debug("生成静态化页面已完成 无需进行处理");
             return;
         }
-        //开始进行课程静态化操作 TODO
+        //开始进行课程静态化操作
         File file = coursePublishService.generateCourseHtml(courseId);
         if(file == null){
             XueChengPlusException.cast("生成静态化页面为空");
@@ -132,14 +132,12 @@ public class CoursePublishTask extends MessageProcessAbstract {
             XueChengPlusException.cast("远程调用课程添加索引服务失败");
 
         }
-
-
         //任务完成 更新任务执行状态
         mqMessageService.completedStageTwo(taskId);
     }
 
     /*
-    * 添加课程信息到redis缓存中
+    * 添加课程信息到redis缓存中 TODO
     * */
     public void saveCourseCache(MqMessage mqMessage,long courseId){
         log.debug("将课程信息缓存至redis,课程id:{}",courseId);

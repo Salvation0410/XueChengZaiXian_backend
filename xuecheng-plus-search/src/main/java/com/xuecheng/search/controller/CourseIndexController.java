@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/index")
 public class CourseIndexController {
-    //课程发布的索引
+    //课程发布的索引 索引库
     @Value("${elasticsearch.course.index}")
     private String courseIndexStore;
 
