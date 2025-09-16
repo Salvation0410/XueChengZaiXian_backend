@@ -71,10 +71,11 @@ public class UserServiceImpl implements UserDetailsService {
     private static UserDetails getUserPrincipal(XcUserExt xcUserExt) {
         //权限
         String[] authorities = {"test"};
+        String password = xcUserExt.getPassword();
         //将敏感信息置空
         xcUserExt.setPassword(null);
         String userJson = JSON.toJSONString(xcUserExt);
-        UserDetails userDetails = User.withUsername(userJson).password(xcUserExt.getPassword()).authorities(authorities).build();
+        UserDetails userDetails = User.withUsername(userJson).password(password).authorities(authorities).build();
         return userDetails;
     }
 }

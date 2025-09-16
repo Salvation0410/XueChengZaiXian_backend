@@ -1,6 +1,7 @@
 package com.xuecheng.ucenter.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.xuecheng.ucenter.feignclient.CheckCodeClient;
 import com.xuecheng.ucenter.mapper.XcUserMapper;
 import com.xuecheng.ucenter.model.dto.AuthParamsDto;
 import com.xuecheng.ucenter.model.dto.XcUserExt;
@@ -8,6 +9,7 @@ import com.xuecheng.ucenter.model.po.XcUser;
 import com.xuecheng.ucenter.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,16 +28,32 @@ public class PasswordAuthServiceImpl implements AuthService {
     private final XcUserMapper xcUserMapper;
     //密码校验
     private final PasswordEncoder passwordEncoder;
+    //验证码服务
+    private final CheckCodeClient checkCodeClient;
     @Override
     public XcUserExt execute(AuthParamsDto authParamsDto) {
-        //TODO 校验验证码是否存在
+
+
 
         //账号是否存在
         String username = authParamsDto.getUsername();
+
+        //远程调用验证码服务验证验证码
+        String checkcode = authParamsDto.getCheckcode();
+        String checkcodekey = authParamsDto.getCheckcodekey();
+        if(StringUtils.isEmpty(checkcodekey) || StringUtils.isEmpty(checkcode)){
+            throw new RuntimeException("请输入验证码");
+        }
+        Boolean verify = checkCodeClient.verify(checkcodekey,checkcode);
+        if(verify == null ){
+            throw new RuntimeException("验证码错误");
+        }
+
         XcUser xcUser = xcUserMapper.selectOne(new LambdaQueryWrapper<XcUser>().eq(XcUser::getUsername, username));
         if(xcUser == null){
             throw  new RuntimeException("账号不存在");
         }
+
         //验证密码
         String password = xcUser.getPassword();
         //获取用户输入的密码
@@ -47,6 +65,7 @@ public class PasswordAuthServiceImpl implements AuthService {
         }
         XcUserExt xcUserExt = new XcUserExt();
         BeanUtils.copyProperties(xcUser,xcUserExt);
+
         return xcUserExt;
     }
 }
