@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * @author Mr.M
  * @version 1.0
- * @description 认证用户请求参数
+ * @description 认证用户请求参数  统一认证的参数
  * @date 2022/9/29 10:56
  */
 @Data

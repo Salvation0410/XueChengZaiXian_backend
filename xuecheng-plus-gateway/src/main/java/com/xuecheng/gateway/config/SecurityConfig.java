@@ -22,7 +22,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
   public SecurityWebFilterChain webFluxSecurityFilterChain(ServerHttpSecurity http) {
 
    return http.authorizeExchange()
-           .pathMatchers("/**").permitAll()
+           .pathMatchers("/**").permitAll() //所有请求都放行
            .anyExchange().authenticated()
            .and().csrf().disable().build();
   }
