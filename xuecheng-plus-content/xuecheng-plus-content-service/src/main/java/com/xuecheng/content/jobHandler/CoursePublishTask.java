@@ -69,7 +69,6 @@ public class CoursePublishTask extends MessageProcessAbstract {
         generateCourseHtml(mqMessage,courseId);
         //向es中写索引数据
         saveCourseIndex(mqMessage,courseId);
-
         //向redis中写缓存数据
         saveCourseCache(mqMessage,courseId);
 
