@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * @description TODO
+ * @description 远程调用媒资模块公开接口
  * @author Mr.M
  * @date 2022/10/27 9:04
  * @version 1.0
@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
  @RequestMapping("/media")
  public interface MediaServiceClient {
 
+  /*
+  * 预览视频接口
+  * */
   @GetMapping("/open/preview/{mediaId}")
   public RestResponse<String> getPlayUrlByMediaId(@PathVariable("mediaId") String mediaId);
 
