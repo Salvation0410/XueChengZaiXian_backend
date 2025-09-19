@@ -1,6 +1,7 @@
 package com.xuecheng.content.api;
 
 import com.xuecheng.content.model.dto.CoursePreviewDto;
+import com.xuecheng.content.model.po.CoursePublish;
 import com.xuecheng.content.service.CoursePublishService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -64,6 +65,17 @@ public class CoursePublishController {
     public void coursepublish(@PathVariable("courseId") Long courseId){
         Long companyId = 1232141425L;
         coursePublishService.publish(companyId,courseId);
+    }
+
+    /*
+    * /r标识为网关白名单接口路径 公开接口  不需要用户登录信息
+    * */
+    @ApiOperation("查询课程发布信息")
+    @ResponseBody
+    @GetMapping("/r/coursepublish/{courseId}")
+    public CoursePublish getCoursepublish(@PathVariable("courseId") Long courseId) {
+        CoursePublish coursePublish = coursePublishService.getCoursePublish(courseId);
+        return coursePublish;
     }
 
 
