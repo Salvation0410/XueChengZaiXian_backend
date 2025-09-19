@@ -69,6 +69,7 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
+        <!--二维码生成组件-->
         <dependency>
             <groupId>com.google.zxing</groupId>
             <artifactId>core</artifactId>
