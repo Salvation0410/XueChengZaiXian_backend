@@ -36,14 +36,9 @@ public class CourseBaseInfoController {
     @PostMapping("/course/list")
     public PageResult<CourseBase> list(PageParams pageParams, @RequestBody(required=false) QueryCourseParamsDto queryCourseParamsDto) {
 
-        //获取当前登录用户
         SecurityUtil.XcUser xcUser = SecurityUtil.getUser();
-        //获取当前用户所属培训机构id
-        Long companyId = null;
-        if(StringUtils.isEmpty(xcUser.getCompanyId())){
-            companyId = Long.parseLong(xcUser.getCompanyId());
-        }
-        PageResult<CourseBase> courseBasePageResult = courseBaseInfoService.queryCourseBaseList(companyId,pageParams,queryCourseParamsDto);
+        String companyId = xcUser.getCompanyId();
+        PageResult<CourseBase> courseBasePageResult = courseBaseInfoService.queryCourseBaseList(Long.parseLong(companyId),pageParams,queryCourseParamsDto);
         return courseBasePageResult;
     }
 
