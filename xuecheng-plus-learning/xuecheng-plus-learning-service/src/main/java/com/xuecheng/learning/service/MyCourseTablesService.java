@@ -27,5 +27,14 @@ public interface MyCourseTablesService {
      * @date 2022/10/3 7:37
      */
     public XcCourseTablesDto getLearningStatus(String userId, Long courseId);
+
+    /**
+     * @description 根据mq的消息更新选课状态并插入数据到课程表
+     * @param chooseCourseId 选课记录id
+     * @return void
+     * @author huang
+     * @date 2025/9/19
+     * */
+    public boolean saveChooseCourseSuccess(String chooseCourseId);
 }
 
