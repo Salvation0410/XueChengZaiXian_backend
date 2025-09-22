@@ -14,7 +14,7 @@ import lombok.ToString;
 @ToString
 public class PayRecordDto extends XcPayRecord {
 
-    //二维码
+    //二维码 base64
     private String qrcode;
 
 }

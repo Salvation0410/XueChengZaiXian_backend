@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 @Service("password_authservice")
 @Slf4j
 @RequiredArgsConstructor
-public class PasswordAuthServiceImpl implements AuthService {
+public class    PasswordAuthServiceImpl implements AuthService {
 
     private final XcUserMapper xcUserMapper;
     //密码校验
