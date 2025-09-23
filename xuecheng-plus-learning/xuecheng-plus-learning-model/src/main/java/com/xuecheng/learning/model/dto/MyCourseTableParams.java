@@ -24,6 +24,7 @@ public class MyCourseTableParams {
    //1即将过期、2已经过期
    private String expiresType;
 
+   //分页参数
    int page=1;
    int startIndex;
    int size=4;
