@@ -202,7 +202,7 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         //修改时间
         courseBase.setChangeDate(LocalDateTime.now());
 
-        //更新课程基本数据
+        //更新课程基本数据  TODO bug 更改营销信息失败
         int update = courseBaseMapper.updateById(courseBase);
         if(update<=0){
             XueChengPlusException.cast("修改课程失败");

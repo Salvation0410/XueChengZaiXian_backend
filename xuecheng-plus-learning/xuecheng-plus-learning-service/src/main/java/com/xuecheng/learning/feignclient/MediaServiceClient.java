@@ -17,9 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
  public interface MediaServiceClient {
 
   /*
-  * 预览视频接口
+  * 获取播放地址
   * */
   @GetMapping("/open/preview/{mediaId}")
   public RestResponse<String> getPlayUrlByMediaId(@PathVariable("mediaId") String mediaId);
+
 
  }

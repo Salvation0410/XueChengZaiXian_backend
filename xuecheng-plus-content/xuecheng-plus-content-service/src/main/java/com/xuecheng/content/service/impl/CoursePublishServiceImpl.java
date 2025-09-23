@@ -68,7 +68,7 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 
 
     /*
-    * 课程预览
+    * 获取课程预览信息
     * */
     @Override
     public CoursePreviewDto getCoursePreviewInfo(Long courseId) {
