@@ -16,13 +16,18 @@ import com.xuecheng.content.service.CoursePublishService;
 import com.xuecheng.content.service.TeachplanService;
 import com.xuecheng.messagesdk.model.po.MqMessage;
 import com.xuecheng.messagesdk.service.MqMessageService;
+import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
@@ -34,11 +39,12 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @ClassName CoursePublishServiceImpl
- * @Description
- * @Author
+ * @Description 课程发布相关接口
+ * @Author huang
  * @Date 2025/9/7 15:10
  */
 
@@ -64,6 +70,13 @@ public class CoursePublishServiceImpl implements CoursePublishService {
     private final MqMessageService mqMessageService;
 
     private final MediaServiceClient mediaServiceClient;
+
+    @Autowired
+    RedisTemplate redisTemplate;
+
+    @Autowired
+    RedissonClient redissonClient;
+
 
 
 
@@ -195,7 +208,9 @@ public class CoursePublishServiceImpl implements CoursePublishService {
             //获取资源文件路径
             String classPath = this.getClass().getResource("/").getPath();
             //指定模板的目录
-            configuration.setDirectoryForTemplateLoading(new File(classPath+"/templates/"));
+            //configuration.setDirectoryForTemplateLoading(new File(classPath+"/templates/"));
+            //由于虚拟机环境中文件目录不一致 更改获取模板的写法
+            configuration.setTemplateLoader(new ClassTemplateLoader(this.getClass().getClassLoader(), "/templates/"));
             //指定编码格式
             configuration.setDefaultEncoding("utf-8");
 
@@ -253,6 +268,55 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         return coursePublish;
     }
 
+    /*
+    * 根据课程id查询缓存 缓存未命中则查询数据库 并存入缓存
+    * */
+    @Override
+    public CoursePublish getCoursePublishCache(Long courseId) {
+        Object object = redisTemplate.opsForValue().get("course:"+courseId);
+        if(object != null){
+            //缓存中存在数据直接返回
+            String jsonString = object.toString();
+            if("null".equals(jsonString)){
+                return null;
+            }
+            CoursePublish coursePublish = JSON.parseObject(jsonString, CoursePublish.class);
+            return coursePublish;
+        }else{
+            //每门课程设置一个锁
+            RLock lock = redissonClient.getLock("coursequerylock:"+courseId);
+            //获取锁
+            lock.lock();
+            try {
+                object = redisTemplate.opsForValue().get("course:" + courseId);
+                if(object!=null){
+                    String jsonString = object.toString();
+                    if("null".equals(jsonString)){
+                        return null;
+                    }
+                    CoursePublish coursePublish = JSON.parseObject(jsonString, CoursePublish.class);
+                    return coursePublish;
+                }
+                System.out.println("=========从数据库查询==========");
+               /* try{
+                    Thread.sleep(60000);
+                }catch (InterruptedException e){
+                   throw new RuntimeException(e);
+                }*/
+                //从数据库查询
+                CoursePublish coursePublish = getCoursePublish(courseId);
+                redisTemplate.opsForValue().set("course:" + courseId, JSON.toJSONString(coursePublish),300,TimeUnit.SECONDS);
+                return coursePublish;
+            }finally {
+                //释放锁
+                lock.unlock();
+            }
+
+        }
+
+
+    }
+
     /**
      * @description 保存消息表记录
      * @param courseId  课程id
@@ -266,6 +330,7 @@ public class CoursePublishServiceImpl implements CoursePublishService {
             XueChengPlusException.cast(CommonError.UNKOWN_ERROR);
         }
     }
+
 
 
 }

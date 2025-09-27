@@ -58,4 +58,9 @@ public interface CoursePublishService {
     * 根据课程id查询课程发布信息
     * */
     CoursePublish getCoursePublish(Long courseId);
+
+    /*
+    * 根据课程id查询课程发布信息缓存 缓存未命中则查询数据库 并存入缓存
+    * */
+    CoursePublish getCoursePublishCache(Long courseId);
 }
