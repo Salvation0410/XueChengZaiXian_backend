@@ -2,6 +2,8 @@ package com.xuecheng.ucenter.service.Impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.xuecheng.auth.Enums.AuthEnum;
+import com.xuecheng.auth.Enums.CommonEnum;
 import com.xuecheng.ucenter.mapper.XcUserMapper;
 import com.xuecheng.ucenter.mapper.XcUserRoleMapper;
 import com.xuecheng.ucenter.model.dto.AuthParamsDto;
@@ -12,7 +14,6 @@ import com.xuecheng.ucenter.service.AuthService;
 import com.xuecheng.ucenter.service.WxAuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Response;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -77,9 +78,9 @@ public class WxAuthServiceImpl implements AuthService, WxAuthService {
         //申请令牌
         Map<String,String> access_token_map = getAccess_token(code);
         //携带令牌查询用户信息
-        String access_token = access_token_map.get("access_token");
+        String access_token = access_token_map.get(AuthEnum.AUTH_ACCESS_TOKEN.getValue());
         // 获取openid
-        String openid = access_token_map.get("openid");
+        String openid = access_token_map.get(AuthEnum.AUTH_CLIENT_ID.getValue());
         //获取用户信息
         Map<String,String> userinfo =getUserinfo(access_token,openid);
 
@@ -172,14 +173,14 @@ public class WxAuthServiceImpl implements AuthService, WxAuthService {
         xcUser.setName(userInfo_map.get("nickname").toString());
         xcUser.setUsername(unionid);
         xcUser.setPassword(unionid);
-        xcUser.setUtype("101001");//学生类型
-        xcUser.setStatus("1");//用户状态
+        xcUser.setUtype(CommonEnum.STUDENT.getValue());//学生类型
+        xcUser.setStatus(CommonEnum.USE_STATUS.getValue());//用户状态
         xcUser.setCreateTime(LocalDateTime.now());
         xcUserMapper.insert(xcUser);
         XcUserRole xcUserRole = new XcUserRole();
         xcUserRole.setId(UUID.randomUUID().toString());
         xcUserRole.setUserId(userId);
-        xcUserRole.setRoleId("17");//学生角色
+        xcUserRole.setRoleId(CommonEnum.STUDENT_ROLE_ID.getValue());//学生角色
         xcUserRoleMapper.insert(xcUserRole);
         return xcUser;
     }

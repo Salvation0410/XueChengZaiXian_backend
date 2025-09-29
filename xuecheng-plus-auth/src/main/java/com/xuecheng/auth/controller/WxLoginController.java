@@ -1,6 +1,6 @@
 package com.xuecheng.auth.controller;
 
-import com.xuecheng.Enums.AuthEnum;
+import com.xuecheng.auth.Enums.AuthEnum;
 import com.xuecheng.ucenter.model.po.XcUser;
 import com.xuecheng.ucenter.service.WxAuthService;
 import lombok.RequiredArgsConstructor;

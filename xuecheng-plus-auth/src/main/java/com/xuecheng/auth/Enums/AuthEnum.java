@@ -1,4 +1,4 @@
-package com.xuecheng.Enums;
+package com.xuecheng.auth.Enums;
 
 import lombok.Getter;
 
@@ -21,6 +21,8 @@ public enum AuthEnum {
     AUTH_WX_LOGIN_FAILURL("微信登录失败跳转网页","redirect:http://www.51xuecheng.cn/error.html"),
     AUTH_WX_LOGIN_SUCCESS_URL("微信登录成功跳转网页","redirect:http://www.51xuecheng.cn/sign.html?username="),
     AUTH_WX_LOGIN_TYPE("微信授权类型","&authType=wx"),
+    AUTH_ACCESS_TOKEN("令牌","access_token"),
+    AUTH_USERNAME("openId","openid"),
     ;
 
     /** 描述信息 */
