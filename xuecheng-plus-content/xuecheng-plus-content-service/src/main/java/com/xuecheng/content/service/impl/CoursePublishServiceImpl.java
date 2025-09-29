@@ -249,7 +249,7 @@ public class CoursePublishServiceImpl implements CoursePublishService {
        try{
            //将file文件转成MultipartFile
            MultipartFile multipartFile = MultipartSupportConfig.getMultipartFile(file);
-            //远程调用得到返回值
+           //远程调用得到返回值
            String upload = mediaServiceClient.upload(multipartFile,"course/"+courseId+".html");
            if(upload == null){
                log.debug("远程调用走降级逻辑得到上传的结果为null");

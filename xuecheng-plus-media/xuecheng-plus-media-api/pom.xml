@@ -96,6 +96,16 @@
             <artifactId>docker-maven-plugin</artifactId>
             <version>1.2.2</version>
         </dependency>
+        <!--SpringSecurity-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-security</artifactId>
+        </dependency>
+        <!--Oauth2-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-oauth2</artifactId>
+        </dependency>
 
     </dependencies>
     <!--打包插件-->

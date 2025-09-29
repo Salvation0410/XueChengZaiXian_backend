@@ -46,8 +46,9 @@ public class CourseBaseInfoController {
     @ApiOperation("新增课程")
     //使用@Validated注解对参数进行验证 并说明分组校验的类型
     public CourseBaseInfoDto createCourseBase(@RequestBody @Validated(ValidationGroups.Insert.class) AddCourseDto addCourseDto){
-        Long companyId = 1232141425L;
-        CourseBaseInfoDto courseBaseInfoDto = courseBaseInfoService.createCourseBase(companyId,addCourseDto);
+        SecurityUtil.XcUser xcUser = SecurityUtil.getUser();
+        String companyId = xcUser.getCompanyId();
+        CourseBaseInfoDto courseBaseInfoDto = courseBaseInfoService.createCourseBase(Long.parseLong(companyId),addCourseDto);
         return courseBaseInfoDto;
     }
 
@@ -61,16 +62,17 @@ public class CourseBaseInfoController {
     @PutMapping("/course")
     @ApiOperation("修改课程信息")
     public CourseBaseInfoDto modifyCourseBase(@RequestBody @Validated(ValidationGroups.Update.class) EditCourseDto editCourseDto){
-        Long companyId = 1232141425L;
-        CourseBaseInfoDto courseBaseInfoDto = courseBaseInfoService.modifyCourseBase(companyId,editCourseDto);
+        SecurityUtil.XcUser xcUser = SecurityUtil.getUser();
+        String companyId = xcUser.getCompanyId();
+        CourseBaseInfoDto courseBaseInfoDto = courseBaseInfoService.modifyCourseBase(Long.parseLong(companyId),editCourseDto);
         return courseBaseInfoDto;
     }
     @DeleteMapping("/course/{courseId}")
     @ApiOperation("删除课程信息")
     public void deleteCourseBase(@PathVariable Long courseId){
-        //机构id，由于认证系统没有上线暂时硬编码
-        Long companyId = 1232141425L;
-        courseBaseInfoService.deleteCourseBase(companyId,courseId);
+        SecurityUtil.XcUser xcUser = SecurityUtil.getUser();
+        String companyId = xcUser.getCompanyId();
+        courseBaseInfoService.deleteCourseBase(Long.parseLong(companyId),courseId);
     }
 
 

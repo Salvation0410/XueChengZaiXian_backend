@@ -196,7 +196,6 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
             XueChengPlusException.cast("本机构只能修改本机构的数据");
         }
 
-
         //封装数据
         BeanUtils.copyProperties(editCourseDto,courseBase);
         //修改时间
@@ -225,6 +224,9 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         return courseBaseInfoDto;
     }
 
+    /*
+    * 删除课程基本信息
+    * */
     @Override
     @Transactional
     public void deleteCourseBase(Long companyId, Long courseId) {

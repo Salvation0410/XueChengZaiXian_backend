@@ -6,6 +6,7 @@ import com.xuecheng.content.model.dto.CoursePreviewDto;
 import com.xuecheng.content.model.dto.TeachplanDto;
 import com.xuecheng.content.model.po.CoursePublish;
 import com.xuecheng.content.service.CoursePublishService;
+import com.xuecheng.content.util.SecurityUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -85,8 +86,9 @@ public class CoursePublishController {
     @ResponseBody
     @PostMapping("/courseaudit/commit/{courseId}")
     public void commitAudit(@PathVariable("courseId") Long courseId){
-        Long companyId = 1232141425L;
-        coursePublishService.commitAudit(companyId,courseId);
+        SecurityUtil.XcUser xcUser = SecurityUtil.getUser();
+        String companyId = xcUser.getCompanyId();
+        coursePublishService.commitAudit(Long.parseLong(companyId),courseId);
     }
     /*
     * 课程发布
@@ -95,8 +97,9 @@ public class CoursePublishController {
     @ResponseBody
     @PostMapping ("/coursepublish/{courseId}")
     public void coursepublish(@PathVariable("courseId") Long courseId){
-        Long companyId = 1232141425L;
-        coursePublishService.publish(companyId,courseId);
+        SecurityUtil.XcUser xcUser = SecurityUtil.getUser();
+        String companyId = xcUser.getCompanyId();
+        coursePublishService.publish(Long.parseLong(companyId),courseId);
     }
 
     /*

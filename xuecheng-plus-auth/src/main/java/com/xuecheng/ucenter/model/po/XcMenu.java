@@ -22,7 +22,7 @@ public class XcMenu implements Serializable {
     private String id;
 
     /**
-     * 菜单编码
+     * 菜单编码 ->权限
      */
     private String code;
 

@@ -1,5 +1,6 @@
 package com.xuecheng.auth.config;
 
+import com.xuecheng.Enums.AuthEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -67,7 +68,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/r/**").authenticated()//访问/r开始的请求需要认证通过
                 .anyRequest().permitAll()//其它请求全部放行
                 .and()
-                .formLogin().successForwardUrl("/login-success");//登录成功跳转到/login-success
+                .formLogin().successForwardUrl(AuthEnum.AUTH_LOGIN_SUCCESS_URL.getValue());//登录成功跳转到/login-success
     }
 
 

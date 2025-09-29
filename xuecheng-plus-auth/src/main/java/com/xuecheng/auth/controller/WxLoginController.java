@@ -1,5 +1,6 @@
 package com.xuecheng.auth.controller;
 
+import com.xuecheng.Enums.AuthEnum;
 import com.xuecheng.ucenter.model.po.XcUser;
 import com.xuecheng.ucenter.service.WxAuthService;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +31,9 @@ public class WxLoginController {
         XcUser xcUser = wxAuthService.wxAuth(code);
 
         if(xcUser==null){
-            return "redirect:http://www.51xuecheng.cn/error.html";
+            return AuthEnum.AUTH_WX_LOGIN_FAILURL.getValue();
         }
         String username = xcUser.getUsername();
-        return "redirect:http://www.51xuecheng.cn/sign.html?username="+username+"&authType=wx";
+        return AuthEnum.AUTH_LOGIN_SUCCESS_URL.getValue()+username+AuthEnum.AUTH_WX_LOGIN_TYPE.getValue();
     }
 }

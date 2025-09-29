@@ -7,6 +7,7 @@ import com.xuecheng.media.model.dto.UploadFileParamsDto;
 import com.xuecheng.media.model.dto.UploadFileResultDto;
 import com.xuecheng.media.model.po.MediaFiles;
 import com.xuecheng.media.service.MediaFileService;
+import com.xuecheng.media.util.SecurityUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +36,9 @@ public class MediaFilesController {
  @ApiOperation("媒资列表查询接口")
  @PostMapping("/files")
  public PageResult<MediaFiles> list(PageParams pageParams, @RequestBody QueryMediaParamsDto queryMediaParamsDto){
-  Long companyId = 1232141425L;
-  return mediaFileService.queryMediaFiels(companyId,pageParams,queryMediaParamsDto);
+     SecurityUtil.XcUser xcUser = SecurityUtil.getUser();
+     String companyId = xcUser.getCompanyId();
+  return mediaFileService.queryMediaFiels(Long.parseLong(companyId),pageParams,queryMediaParamsDto);
 
  }
 
@@ -46,6 +48,9 @@ public class MediaFilesController {
                                    @RequestParam(value = "objectName",required = false)
                                    String objectName
                                    ) throws IOException {
+
+     SecurityUtil.XcUser xcUser = SecurityUtil.getUser();
+     Long companyId = Long.parseLong(xcUser.getCompanyId());
      //准备上传文件的信息
      UploadFileParamsDto uploadFileParamsDto = new UploadFileParamsDto();
      //原始文件名称
@@ -57,7 +62,6 @@ public class MediaFilesController {
      //创建一个临时文件
      File tempFile = File.createTempFile("minio", ".temp");
      filedata.transferTo(tempFile);
-     Long companyId = 1232141425L;
      //文件路径
      String localFilePath = tempFile.getAbsolutePath();
 

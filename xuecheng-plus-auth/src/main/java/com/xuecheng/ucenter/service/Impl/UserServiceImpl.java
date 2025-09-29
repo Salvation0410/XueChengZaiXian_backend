@@ -78,23 +78,25 @@ public class UserServiceImpl implements UserDetailsService {
      * @return
      */
     private  UserDetails getUserPrincipal(XcUserExt xcUserExt) {
-        //根据用户id查询用户的权限  理清用户 角色 权限 以及中间表的关系
-        String[] authorities = {"test"};
-        String password = xcUserExt.getPassword();
+        // 根据用户id查询用户的权限
         List<XcMenu> xcMenus = xcMenuMapper.selectPermissionByUserId(xcUserExt.getId());
-        //TODO 采用stream流式写法 并优化密码置空部分
-        if(xcMenus.size()>0){
-            //存储用户权限
-            List<String> permissions = new ArrayList<>();
-            xcMenus.forEach(xcMenu -> {
-                permissions.add(xcMenu.getCode());
-            });
-            authorities = permissions.toArray(new String[0]);
-        }
-        //将敏感信息置空
+
+        // 使用 Stream 将权限列表提取出来
+        String[] authorities = xcMenus.stream()
+                .map(XcMenu::getCode)
+                .toArray(String[]::new);
+
+        // 取出密码并置空
+        String password = xcUserExt.getPassword();
         xcUserExt.setPassword(null);
+
+        // 转换成 JSON 存储用户信息
         String userJson = JSON.toJSONString(xcUserExt);
-        UserDetails userDetails = User.withUsername(userJson).password(password).authorities(authorities).build();
-        return userDetails;
+
+        // 构建 Spring Security 的 UserDetails
+        return User.withUsername(userJson)
+                .password(password)
+                .authorities(authorities.length > 0 ? authorities : new String[]{"test"})
+                .build();
     }
 }

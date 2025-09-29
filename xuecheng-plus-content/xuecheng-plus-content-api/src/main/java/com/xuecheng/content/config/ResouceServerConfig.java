@@ -16,7 +16,9 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
  * @version 1.0
  */
  @Configuration
+ //开启资源服务（结合Oauth2）让本服务具备接收并校验access_token的能力
  @EnableResourceServer
+ //启用方法级别的校验功能
  @EnableGlobalMethodSecurity(securedEnabled = true,prePostEnabled = true)
  public class ResouceServerConfig extends ResourceServerConfigurerAdapter {
 

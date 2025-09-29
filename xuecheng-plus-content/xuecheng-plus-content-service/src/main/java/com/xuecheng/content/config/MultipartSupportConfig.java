@@ -43,6 +43,7 @@ public class MultipartSupportConfig {
 
     //将file转为Multipart
     public static MultipartFile getMultipartFile(File file) {
+        //参数：表单字段名, contentType, true->文件上传, fileName
         FileItem item = new DiskFileItemFactory().createItem("file", MediaType.MULTIPART_FORM_DATA_VALUE, true, file.getName());
         try (FileInputStream inputStream = new FileInputStream(file);
              OutputStream outputStream = item.getOutputStream();) {

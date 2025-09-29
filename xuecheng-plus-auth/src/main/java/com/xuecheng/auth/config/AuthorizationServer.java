@@ -1,5 +1,6 @@
 package com.xuecheng.auth.config;
 
+import com.xuecheng.Enums.AuthEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,16 +38,15 @@ import javax.annotation.Resource;
   public void configure(ClientDetailsServiceConfigurer clients)
           throws Exception {
         clients.inMemory()// 使用in-memory存储
-                .withClient("XcWebApp")// client_id
+                .withClient(AuthEnum.AUTH_CLIENT_ID.getValue())// client_id
  //               .secret("XcWebApp")//客户端密钥
                 //对密钥进行加密处理
-                .secret(new BCryptPasswordEncoder().encode("XcWebApp"))//客户端密钥
-                .resourceIds("xuecheng-plus")//资源列表
-                .authorizedGrantTypes("authorization_code", "password","client_credentials","implicit","refresh_token")// 该client允许的授权类型authorization_code,password,refresh_token,implicit,client_credentials
-                .scopes("all")// 允许的授权范围
+                .secret(new BCryptPasswordEncoder().encode(AuthEnum.AUTH_CLIENT_SECRET.getValue()))//客户端密钥
+                .resourceIds(AuthEnum.AUTH_RESOURCE_ID.getValue())//资源列表
+                .authorizedGrantTypes(AuthEnum.AUTH_AUTHORIZED_GRANT_TYPES.getValue())
                 .autoApprove(false)//false跳转到授权页面
                 //客户端接收授权码的重定向地址
-                .redirectUris("http://www.51xuecheng.cn")
+                .redirectUris(AuthEnum.AUTH_REDIRECT_URI.getValue())
    ;
   }
 
