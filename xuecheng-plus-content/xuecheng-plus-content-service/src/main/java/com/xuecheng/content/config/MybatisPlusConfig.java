@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Mr.M
  * @version 1.0
- * @description TODO
+ * @description mp分页拦截器
  * @date 2023/2/12 9:23
  */
 @Configuration

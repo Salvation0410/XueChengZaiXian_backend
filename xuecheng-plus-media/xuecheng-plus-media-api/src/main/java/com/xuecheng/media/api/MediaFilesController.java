@@ -64,7 +64,6 @@ public class MediaFilesController {
      filedata.transferTo(tempFile);
      //文件路径
      String localFilePath = tempFile.getAbsolutePath();
-
      //调用service上传图片
      UploadFileResultDto uploadFileResultDto = mediaFileService.uploadFile(companyId, uploadFileParamsDto, localFilePath, objectName);
 

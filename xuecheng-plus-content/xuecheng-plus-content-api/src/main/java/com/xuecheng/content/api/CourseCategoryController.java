@@ -1,5 +1,6 @@
 package com.xuecheng.content.api;
 
+import com.xuecheng.content.Enum.CommonEnum;
 import com.xuecheng.content.model.dto.CourseCategoryTreeDto;
 import com.xuecheng.content.service.CourseCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,6 @@ public class CourseCategoryController {
     @GetMapping("/course-category/tree-nodes")
     public List<CourseCategoryTreeDto> queryTreeNodes(){
         //传入根节点
-        return courseCategoryService.queryTreeNodes("1");
+        return courseCategoryService.queryTreeNodes(CommonEnum.ROOT_NODE_ID.getValue());
     }
 }

@@ -14,7 +14,6 @@ public enum AuthEnum {
     AUTH_CLIENT_ID("客户端id", "XcWebApp"),
     AUTH_CLIENT_SECRET("客户端密钥", "XcWebApp"),
     AUTH_RESOURCE_ID("资源列表", "xuecheng-plus"),
-    AUTH_AUTHORIZED_GRANT_TYPES("授权类型", "authorization_code,password,client_credentials,refresh_token"),
     AUTH_SCOPE("授权范围", "all"),
     AUTH_REDIRECT_URI("客户端接收授权码重定向地址", "http://www.51xuecheng.cn"),
     AUTH_LOGIN_SUCCESS_URL("登录成功跳转路径","/login-success"),
@@ -34,6 +33,18 @@ public enum AuthEnum {
     AuthEnum(String desc, String value) {
         this.desc = desc;
         this.value = value;
+    }
+
+    /**
+     * 获取授权类型数组 - 专门为authorizedGrantTypes方法提供
+     */
+    public static String[] getAuthorizedGrantTypes() {
+        return new String[]{
+                "authorization_code",
+                "password",
+                "client_credentials",
+                "refresh_token"
+        };
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.xuecheng.content.Enum;
+package com.xuecheng.base.Enum;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,8 +37,8 @@ public enum CommonEnum {
     SUBMIT_APPROVED("202004", "审核通过"),
 
     // ================== 课程费用 ==================
-    COURSE_FREE("201001", "免费"),
-    COURSE_PAID("201002", "收费"),
+    COURSE_FREE("201000", "免费"),
+    COURSE_PAID("201001", "收费"),
 
     // ================== 课程等级 ==================
     COURSE_LEVEL_PRIMARY("204001", "初级"),

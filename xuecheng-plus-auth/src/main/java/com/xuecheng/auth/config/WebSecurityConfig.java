@@ -1,6 +1,5 @@
 package com.xuecheng.auth.config;
 
-import com.xuecheng.auth.Enums.AuthEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.cors.CorsConfiguration;
 
 /**
  * @author Mr.M
@@ -20,14 +20,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  */
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true,prePostEnabled = true)
+
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     DaoAuthenticationProviderCustom daoAuthenticationProviderCustom;
 
     /*
-    * 配置认证管理Bean
-    * */
+     * 配置认证管理Bean
+     * */
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
@@ -38,16 +39,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.authenticationProvider(daoAuthenticationProviderCustom);
     }
 
-    //配置用户信息服务
-    /*@Bean
-    public UserDetailsService userDetailsService() {
-        //这里配置用户信息,这里暂时使用这种方式将用户存储在内存中
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        //添加用户p1权限
-        manager.createUser(User.withUsername("zhangsan").password("123").authorities("p1").build());
-        manager.createUser(User.withUsername("lisi").password("456").authorities("p2").build());
-        return manager;
-    }*/
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -56,18 +47,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-    //配置安全拦截机制
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
-                .antMatchers("/r/**").authenticated()//访问/r开始的请求需要认证通过
-                .anyRequest().permitAll()//其它请求全部放行
-                .and()
-                .formLogin().successForwardUrl(AuthEnum.AUTH_LOGIN_SUCCESS_URL.getValue());//登录成功跳转到/login-success
-    }
-
-
+        //配置安全拦截机制
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http
+                    .authorizeRequests()
+                    .antMatchers("/media/upload/coursefile").permitAll()  // 放行完整路径
+                    .antMatchers("/media/open/**").permitAll()  // 如果有开放接口也放行
+                    .anyRequest().authenticated()
+                    .and()
+                    .csrf().disable()  // 文件上传需要禁用CSRF
+                    .cors();  // 启用CORS支持
+        }
 
 
 
