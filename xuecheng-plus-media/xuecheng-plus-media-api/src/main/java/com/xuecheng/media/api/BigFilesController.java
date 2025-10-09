@@ -65,8 +65,7 @@ public class BigFilesController {
     public RestResponse mergechunks(@RequestParam("fileMd5") String fileMd5,
                                     @RequestParam("fileName") String fileName,
                                     @RequestParam("chunkTotal") int chunkTotal) throws Exception {
-        SecurityUtil.XcUser xcUser = SecurityUtil.getUser();
-        Long companyId = Long.parseLong(xcUser.getCompanyId());
+        Long companyId = 1232141425L;
 
         UploadFileParamsDto uploadFileParamsDto = new UploadFileParamsDto();
         uploadFileParamsDto.setFilename(fileName);

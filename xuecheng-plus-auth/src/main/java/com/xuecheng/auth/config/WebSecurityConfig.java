@@ -8,9 +8,12 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 /**
  * @author Mr.M
@@ -20,7 +23,6 @@ import org.springframework.web.cors.CorsConfiguration;
  */
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true,prePostEnabled = true)
-
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -39,26 +41,26 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.authenticationProvider(daoAuthenticationProviderCustom);
     }
 
-
+    /*
+     * 密码编码器 进行加密处理
+     * */
     @Bean
     public PasswordEncoder passwordEncoder() {
-//        //密码为明文方式
-//        return NoOpPasswordEncoder.getInstance();
         return new BCryptPasswordEncoder();
     }
 
-        //配置安全拦截机制
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
-            http
-                    .authorizeRequests()
-                    .antMatchers("/media/upload/coursefile").permitAll()  // 放行完整路径
-                    .antMatchers("/media/open/**").permitAll()  // 如果有开放接口也放行
-                    .anyRequest().authenticated()
-                    .and()
-                    .csrf().disable()  // 文件上传需要禁用CSRF
-                    .cors();  // 启用CORS支持
-        }
+    //配置安全拦截机制
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests()
+                .antMatchers("/r/**").authenticated()//访问/r开始的请求需要认证通过
+                .anyRequest().permitAll()//其它请求全部放行
+                .and()
+                .formLogin().successForwardUrl("/login-success");//登录成功跳转到/login-success
+    }
+
+
 
 
 
