@@ -21,6 +21,10 @@
             <artifactId>xuecheng-plus-media-model</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
 
         <!-- MySQL 驱动 -->
         <dependency>
@@ -63,7 +67,7 @@
             <artifactId>minio</artifactId>
             <version>8.4.3</version>
         </dependency>
-        <!--使用okhttp上传文件到minioa-->
+        <!--使用okhttp上传文件到minio-->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
@@ -75,6 +79,16 @@
             <artifactId>xxl-job-core</artifactId>
         </dependency>
 
+        <!--Spring Security-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-security</artifactId>
+        </dependency>
+        <!--oauth2-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-oauth2</artifactId>
+        </dependency>
 
     </dependencies>
 

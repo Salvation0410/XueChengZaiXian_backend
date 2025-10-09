@@ -21,10 +21,16 @@ public enum CommonEnum {
     DELETE_STATUS("0", "删除状态"),
     TEMP_STATUS("-1", "暂时状态"),
 
-    // ================== 审核状态 ==================
+    // ================== 对象的审核状态 ==================
     AUDIT_NOT_APPROVED("002001", "审核未通过"),
     AUDIT_PENDING("002002", "未审核"),
     AUDIT_APPROVED("002003", "审核通过"),
+
+    // ================== 课程审核状态 ==================
+    COURSE_AUDIT_NOT_APPROVED("202001", "审核未通过"),
+    COURSE_AUDIT_PENDING("202002", "未提交"),
+    COURSE_AUDIT_APPROVED("202003", "已提交"),
+    COURSE_AUDIT_REJECTED("202004", "审核通过"),
 
     // ================== 媒体类型 ==================
     MEDIA_IMAGE("001001", "图片"),

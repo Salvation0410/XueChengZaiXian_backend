@@ -86,7 +86,6 @@ public class CoursePublishServiceImpl implements CoursePublishService {
     @Override
     public CoursePreviewDto getCoursePreviewInfo(Long courseId) {
         CoursePreviewDto coursePreviewDto =new CoursePreviewDto();
-
         //查询课程基本信息 营销信息
         CourseBaseInfoDto courseBaseInfo = courseBaseInfoService.getCourseBaseInfo(courseId);
         coursePreviewDto.setCourseBase(courseBaseInfo);
@@ -107,7 +106,9 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         if(courseBaseInfo == null){
             XueChengPlusException.cast("课程不存在");
         }
-        //TODO 本机构只能提交本机构的课程信息 根据companyId进行校验
+        if(!courseBaseInfo.getCompanyId().equals(companyId)){
+            XueChengPlusException.cast("本机构只能提交本机构的课程");
+        }
         //查询审核状态 当为已提交时不允许重复提交
         String auditStatus = courseBaseInfo.getAuditStatus();
         if(auditStatus.equals("202003")){

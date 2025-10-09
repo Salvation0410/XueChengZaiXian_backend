@@ -247,7 +247,6 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         //如果课程收费，价格没有填写也需要抛出异常
         if(charge.equals(CommonEnum.COURSE_PAID.getValue())){
            if(courseMarketNew.getPrice() ==null || courseMarketNew.getPrice().floatValue()<=0){
-              //throw new RuntimeException("课程的价格不能为空并且必须大于0");
                XueChengPlusException.cast("课程的价格不能为空并且必须大于0");
            }
         }
