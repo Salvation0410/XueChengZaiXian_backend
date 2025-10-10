@@ -132,7 +132,9 @@ public enum CommonEnum {
     CURRENCY_TYPE_CNY("CNY", "人民币"),
     CURRENCY_TYPE_USD("USD", "美元"),
 
-
+    //================= 媒资文件状态 ==============
+    MEDIA_FILE_NORMAL("1", "正常"),
+    MEDIA_FILE_UNSHOWN("0", "不展示"),
     ;
 
     private final String value;

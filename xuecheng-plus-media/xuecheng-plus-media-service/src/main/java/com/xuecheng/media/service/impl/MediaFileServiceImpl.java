@@ -219,16 +219,16 @@ public class MediaFileServiceImpl implements MediaFileService {
    //上传时间
    mediaFiles.setCreateDate(LocalDateTime.now());
    //状态
-   mediaFiles.setStatus("1");
+   mediaFiles.setStatus(CommonEnum.MEDIA_FILE_NORMAL.getValue());
    //审核状态
-   mediaFiles.setAuditStatus("002003");
+   mediaFiles.setAuditStatus(CommonEnum.AUDIT_APPROVED.getValue());
    //插入数据库
    int insert = mediaFilesMapper.insert(mediaFiles);
    if(insert<=0){
     log.debug("向数据库保存文件失败,bucket:{},objectName:{}",bucket,objectName);
     return null;
    }
-   //记录待处理任务 视频上传成功后添加 TODO 对文件的mimeType进行判断 提取一个公共的方法 这里是对avi视频进行数据的插入
+   //记录待处理任务 视频上传成功后添加
    addMediaTask(mediaFiles);
 
    return mediaFiles;
@@ -248,7 +248,6 @@ public class MediaFileServiceImpl implements MediaFileService {
   //获取文件扩展名
   String extension= fileName.substring(fileName.lastIndexOf("."));
   String mimeType =getMineType(extension);
-  // TODO 这里可以将多种mimeType进行判断 弄一个集合 判断当前的mimeType是否在集合中
   if(mimeType.equals("video/x-msvideo")){
     //如果是avi视频写入待处理任务
    MediaProcess mediaProcess = new MediaProcess();
