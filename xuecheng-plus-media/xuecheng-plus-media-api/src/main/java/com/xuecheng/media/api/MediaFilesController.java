@@ -2,6 +2,7 @@ package com.xuecheng.media.api;
 
 import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
+import com.xuecheng.media.Enum.CommonEnum;
 import com.xuecheng.media.model.dto.QueryMediaParamsDto;
 import com.xuecheng.media.model.dto.UploadFileParamsDto;
 import com.xuecheng.media.model.dto.UploadFileResultDto;
@@ -49,22 +50,23 @@ public class MediaFilesController {
                                    String objectName
                                    ) throws IOException {
 
-     Long companyId = 1232141425L;
+     SecurityUtil.XcUser xcUser = SecurityUtil.getUser();
+     String companyId = xcUser.getCompanyId();
      //准备上传文件的信息
      UploadFileParamsDto uploadFileParamsDto = new UploadFileParamsDto();
      //原始文件名称
      uploadFileParamsDto.setFilename(filedata.getOriginalFilename());
      //文件大小
      uploadFileParamsDto.setFileSize(filedata.getSize());
-     //文件类型
-     uploadFileParamsDto.setFileType("001001");
+     //资源类型
+     uploadFileParamsDto.setFileType(CommonEnum.MEDIA_IMAGE.getValue());
      //创建一个临时文件
      File tempFile = File.createTempFile("minio", ".temp");
      filedata.transferTo(tempFile);
      //文件路径
      String localFilePath = tempFile.getAbsolutePath();
      //调用service上传图片
-     UploadFileResultDto uploadFileResultDto = mediaFileService.uploadFile(companyId, uploadFileParamsDto, localFilePath, objectName);
+     UploadFileResultDto uploadFileResultDto = mediaFileService.uploadFile(Long.parseLong(companyId), uploadFileParamsDto, localFilePath, objectName);
 
      return uploadFileResultDto;
 

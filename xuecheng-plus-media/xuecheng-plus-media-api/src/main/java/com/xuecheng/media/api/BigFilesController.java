@@ -65,14 +65,15 @@ public class BigFilesController {
     public RestResponse mergechunks(@RequestParam("fileMd5") String fileMd5,
                                     @RequestParam("fileName") String fileName,
                                     @RequestParam("chunkTotal") int chunkTotal) throws Exception {
-        Long companyId = 1232141425L;
+        SecurityUtil.XcUser xcUser = SecurityUtil.getUser();
+        String companyId = xcUser.getCompanyId();
 
         UploadFileParamsDto uploadFileParamsDto = new UploadFileParamsDto();
         uploadFileParamsDto.setFilename(fileName);
         uploadFileParamsDto.setTags("视频文件");
         //对应数据字典中的文件类型
         uploadFileParamsDto.setFileType("001002");
-        RestResponse restResponse =  mediaFileService.mergeChunks(companyId, fileMd5, chunkTotal, uploadFileParamsDto);
+        RestResponse restResponse =  mediaFileService.mergeChunks(Long.parseLong(companyId), fileMd5, chunkTotal, uploadFileParamsDto);
         return restResponse;
     }
 
