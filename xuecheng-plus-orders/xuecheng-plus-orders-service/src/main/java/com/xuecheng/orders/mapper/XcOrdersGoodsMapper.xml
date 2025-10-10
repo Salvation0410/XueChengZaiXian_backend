@@ -18,4 +18,28 @@
         id, order_id, goods_id, goods_type, goods_name, goods_price, goods_detail
     </sql>
 
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO xc_orders_goods (
+        id,
+        order_id,
+        goods_id,
+        goods_type,
+        goods_name,
+        goods_price,
+        goods_detail,
+        ) VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.id},
+            #{item.orderId},
+            #{item.goodsId},
+            #{item.goodsType},
+            #{item.goodsName},
+            #{item.goodsPrice},
+            #{item.goodsDetail},
+
+            )
+        </foreach>
+    </insert>
+
 </mapper>

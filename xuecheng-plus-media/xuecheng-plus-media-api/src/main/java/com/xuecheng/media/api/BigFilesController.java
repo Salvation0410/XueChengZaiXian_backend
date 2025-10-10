@@ -1,8 +1,8 @@
 package com.xuecheng.media.api;
 
+import com.xuecheng.base.Enum.CommonEnum;
 import com.xuecheng.base.model.RestResponse;
 import com.xuecheng.media.model.dto.UploadFileParamsDto;
-import com.xuecheng.media.model.po.MediaFiles;
 import com.xuecheng.media.service.MediaFileService;
 import com.xuecheng.media.util.SecurityUtil;
 import io.swagger.annotations.Api;
@@ -72,7 +72,7 @@ public class BigFilesController {
         uploadFileParamsDto.setFilename(fileName);
         uploadFileParamsDto.setTags("视频文件");
         //对应数据字典中的文件类型
-        uploadFileParamsDto.setFileType("001002");
+        uploadFileParamsDto.setFileType(CommonEnum.MEDIA_VIDEO.getValue());
         RestResponse restResponse =  mediaFileService.mergeChunks(Long.parseLong(companyId), fileMd5, chunkTotal, uploadFileParamsDto);
         return restResponse;
     }

@@ -32,7 +32,7 @@ public enum CommonEnum {
     COURSE_AUDIT_APPROVED("202003", "已提交"),
     COURSE_AUDIT_REJECTED("202004", "审核通过"),
 
-    // ================== 媒体类型 ==================
+    // ================== 资源类型 ==================
     MEDIA_IMAGE("001001", "图片"),
     MEDIA_VIDEO("001002", "视频"),
     MEDIA_OTHER("001003", "其它"),
@@ -119,6 +119,19 @@ public enum CommonEnum {
 
     //树形表的根节点
     ROOT_NODE_ID("1", "树形表的根节点"),
+
+    //=================== 支付方式 ===============
+    PAY_WAY_ALIPAY("ALIPAY", "支付宝"),
+    PAY_WAY_WECHAT("WECHAT", "微信"),
+    PAY_WAY_CASH("CASH", "现金"),
+
+    //================== 支付宝接口支付成功标志  ================
+    ALIPAY_SUCCESS("TRADE_SUCCESS", "支付宝接口支付成功标志"),
+
+    //================== 货币类型 ==============
+    CURRENCY_TYPE_CNY("CNY", "人民币"),
+    CURRENCY_TYPE_USD("USD", "美元"),
+
 
     ;
 

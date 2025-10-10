@@ -5,6 +5,7 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
+import com.xuecheng.base.Enum.CommonEnum;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.orders.config.AlipayConfig;
 import com.xuecheng.orders.model.dto.AddOrderDto;
@@ -80,7 +81,7 @@ public class OrderController {
         }
         //支付状态
         String status = payRecord.getStatus();
-        if("601002".equals(status)){
+        if(CommonEnum.PAY_PAID.getValue().equals(status)){
             XueChengPlusException.cast("订单已支付，请勿重复支付。");
         }
         //构造sdk的客户端对象

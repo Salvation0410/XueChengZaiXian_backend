@@ -1,5 +1,6 @@
 package com.xuecheng.orders.service.Impl;
 
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
@@ -8,6 +9,7 @@ import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.xuecheng.base.Enum.CommonEnum;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.utils.IdWorkerUtils;
 import com.xuecheng.base.utils.QRCodeUtil;
@@ -44,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author huang
@@ -126,7 +129,7 @@ public class OrderServiceImpl implements OrderService {
         order.setId(orderId);
         order.setTotalPrice(addOrderDto.getTotalPrice());
         order.setCreateDate(LocalDateTime.now());
-        order.setStatus("600001");//未支付
+        order.setStatus(CommonEnum.PAY_PENDING.getValue());//未支付
         order.setUserId(userId);
         order.setOrderType(addOrderDto.getOrderType());
         order.setOrderName(addOrderDto.getOrderName());
@@ -135,15 +138,24 @@ public class OrderServiceImpl implements OrderService {
         order.setOutBusinessId(addOrderDto.getOutBusinessId());//选课记录id
         xcOrdersMapper.insert(order);
 
-        //TODO  循环插入数据库性能差 使用xml批量插入 字符串转数组使用hutool工具
+        // 使用Hutool工具将JSON字符串转换为List，并批量插入
         String orderDetailJson = addOrderDto.getOrderDetail();
-        List<XcOrdersGoods> xcOrdersGoodsList = JSON.parseArray(orderDetailJson, XcOrdersGoods.class);
-        xcOrdersGoodsList.forEach(goods->{
+        List<XcOrdersGoods> xcOrdersGoodsList = JSONUtil.toList(orderDetailJson, XcOrdersGoods.class);
+
+        // 为每个商品明细设置订单ID并生成ID
+        List<XcOrdersGoods> batchList = xcOrdersGoodsList.stream().map(goods -> {
             XcOrdersGoods xcOrdersGoods = new XcOrdersGoods();
-            BeanUtils.copyProperties(goods,xcOrdersGoods);
-            xcOrdersGoods.setOrderId(orderId);//订单号
-            xcOrdersGoodsMapper.insert(xcOrdersGoods);
-        });
+            BeanUtils.copyProperties(goods, xcOrdersGoods);
+            xcOrdersGoods.setOrderId(orderId); // 设置订单号
+            return xcOrdersGoods;
+        }).collect(Collectors.toList());
+
+        // 批量插入
+        if (!batchList.isEmpty()) {
+            int insertedCount = xcOrdersGoodsMapper.batchInsert(batchList);
+            log.info("批量插入订单商品明细成功，订单ID: {}, 插入条数: {}", orderId, insertedCount);
+        }
+
         return order;
 
     }
@@ -164,7 +176,7 @@ public class OrderServiceImpl implements OrderService {
         if(orders==null){
             XueChengPlusException.cast("订单不存在");
         }
-        if(orders.getStatus().equals("600002")){
+        if(orders.getStatus().equals(CommonEnum.PAY_PAID.getValue())){
             XueChengPlusException.cast("订单已支付");
         }
         XcPayRecord payRecord = new XcPayRecord();
@@ -174,9 +186,9 @@ public class OrderServiceImpl implements OrderService {
         payRecord.setOrderId(orders.getId());//商品订单号
         payRecord.setOrderName(orders.getOrderName());
         payRecord.setTotalPrice(orders.getTotalPrice());
-        payRecord.setCurrency("CNY");
+        payRecord.setCurrency(CommonEnum.CURRENCY_TYPE_CNY.getValue());
         payRecord.setCreateDate(LocalDateTime.now());
-        payRecord.setStatus("601001");//未支付
+        payRecord.setStatus(CommonEnum.PAY_PENDING.getValue());//未支付
         payRecord.setUserId(orders.getUserId());
         xcPayRecordMapper.insert(payRecord);
         return payRecord;
@@ -271,19 +283,19 @@ public class OrderServiceImpl implements OrderService {
         }
         String statusDb = payStatusDto.getTrade_status();
         //这是从数据库获取的支付状态信息
-        if(statusDb.equals("601002")){
+        if(statusDb.equals(CommonEnum.ORDER_PAID.getValue())){
             //支付成功
             return ;
         }
         //从支付宝获取支付状态信息
         String status = payStatusDto.getTrade_status();
-        if("TRADE_SUCCESS".equals(status)){
+        if(CommonEnum.ALIPAY_SUCCESS.getValue().equals(status)){
             //更新记录表的状态信息以及订单表的状态信息
-            payRecord.setStatus("601002");
+            payRecord.setStatus(CommonEnum.ORDER_PAID.getValue());
             //支付宝的订单号
             payRecord.setOutPayNo(payStatusDto.getTrade_no());
             //第三方的支付渠道编号 这里只有支付宝 后续增加接口需要增加字段添加枚举类
-            payRecord.setOutPayChannel("ALIPAY");
+            payRecord.setOutPayChannel(CommonEnum.PAY_WAY_ALIPAY.getValue());
             //支付成功时间
             payRecord.setPaySuccessTime(LocalDateTime.now());
             //更新支付记录表
