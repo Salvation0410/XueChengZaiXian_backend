@@ -2,6 +2,7 @@ package com.xuecheng.media.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.xuecheng.base.Enum.CommonEnum;
 import com.xuecheng.media.mapper.MediaFilesMapper;
 import com.xuecheng.media.mapper.MediaProcessHistoryMapper;
 import com.xuecheng.media.mapper.MediaProcessMapper;
@@ -69,7 +70,7 @@ public class MediaFileProcessServiceImpl implements MediaFileProcessService {
         LocalDateTime now = LocalDateTime.now();
 
         //1.任务执行失败
-        if(status.equals("3")){
+        if(status.equals(CommonEnum.VIDEO_PROCESS_FAILED.getValue())){
             //1.1 更新mediaProcess表中数据
             //写法1
             /*mediaProcess.setStatus("3");
@@ -80,7 +81,7 @@ public class MediaFileProcessServiceImpl implements MediaFileProcessService {
             //写法2 使用mp
             // 使用原子操作直接增加失败次数，避免并发问题
             LambdaUpdateWrapper<MediaProcess> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.set(MediaProcess::getStatus, "3")
+            updateWrapper.set(MediaProcess::getStatus,CommonEnum.VIDEO_PROCESS_FAILED.getValue())
                     .setSql("fail_count = fail_count + 1") // 使用SQL表达式原子增加
                     .set(MediaProcess::getErrormsg, errorMsg)
                     .eq(MediaProcess::getId, taskId);
@@ -99,7 +100,7 @@ public class MediaFileProcessServiceImpl implements MediaFileProcessService {
         mediaFilesMapper.updateById(mediaFiles);
         //2.2更新MediaFiles表状态 TODO 设置完成时间失败 需完善
         LambdaUpdateWrapper<MediaProcess> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.set(MediaProcess::getStatus,"2")
+        updateWrapper.set(MediaProcess::getStatus,CommonEnum.VIDEO_PROCESS_SUCCESS.getValue())
                 .set(MediaProcess::getFinishDate,LocalDateTime.now())
                 .set(MediaProcess::getUrl,url)
                 .eq(MediaProcess::getId,taskId);

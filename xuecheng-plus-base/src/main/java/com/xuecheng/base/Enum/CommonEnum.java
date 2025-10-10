@@ -37,6 +37,11 @@ public enum CommonEnum {
     MEDIA_VIDEO("001002", "视频"),
     MEDIA_OTHER("001003", "其它"),
 
+    // ================== 视频状态 ==============
+    VIDEO_UNPROCESSED("1", "未处理"),
+    VIDEO_PROCESS_SUCCESS("2", "处理成功"),
+    VIDEO_PROCESS_FAILED("3", "处理失败"),
+
     // ================== 提交状态 ==================
     SUBMIT_NOT_SUBMITTED("202001", "未提交"),
     SUBMIT_SUBMITTED("202002", "已提交"),
