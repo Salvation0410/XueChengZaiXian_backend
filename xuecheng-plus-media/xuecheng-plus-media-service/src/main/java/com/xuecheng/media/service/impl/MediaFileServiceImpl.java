@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
+import com.xuecheng.base.Enum.CommonEnum;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
@@ -252,8 +253,8 @@ public class MediaFileServiceImpl implements MediaFileService {
     //如果是avi视频写入待处理任务
    MediaProcess mediaProcess = new MediaProcess();
    BeanUtils.copyProperties(mediaFiles,mediaProcess);
-   //设置状态 TODO 不使用魔法值 采用枚举进行状态设置
-   mediaProcess.setStatus("1");
+   //设置状态
+   mediaProcess.setStatus(CommonEnum.VIDEO_UNPROCESSED.getValue());
    mediaProcess.setCreateDate(LocalDateTime.now());
    mediaProcess.setFailCount(0);
    //插入数据
