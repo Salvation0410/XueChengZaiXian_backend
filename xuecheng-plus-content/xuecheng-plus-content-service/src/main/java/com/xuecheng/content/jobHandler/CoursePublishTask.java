@@ -14,9 +14,12 @@ import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -39,6 +42,9 @@ public class CoursePublishTask extends MessageProcessAbstract {
 
     @Autowired
     CoursePublishMapper coursePublishMapper;
+
+    @Autowired
+    RedisTemplate redisTemplate;
 
     public CoursePublishTask(MqMessageService mqMessageService) {
         super(mqMessageService);
@@ -135,15 +141,90 @@ public class CoursePublishTask extends MessageProcessAbstract {
     }
 
     /*
-    * 添加课程信息到redis缓存中 TODO
-    * */
-    public void saveCourseCache(MqMessage mqMessage,long courseId){
-        log.debug("将课程信息缓存至redis,课程id:{}",courseId);
-        try {
-            TimeUnit.SECONDS.sleep(2);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+     * 添加课程信息到redis缓存中 - 使用Hash结构
+     * */
+    public void saveCourseCache(MqMessage mqMessage, long courseId) {
+        //获取消息表中的任务三的执行状态
+        Long taskId = mqMessage.getId();
+        MqMessageService mqMessageService = this.getMqMessageService();
+
+        //为了保证任务结果一致性 这里同样需要做幂等性处理
+        int stageThree = mqMessageService.getStageThree(taskId);
+        if (stageThree > 0) {
+            log.debug("添加课程信息到redis缓存已完成 无需处理");
+            return;
         }
 
+        //查询课程发布信息
+        CoursePublish coursePublish = coursePublishMapper.selectById(courseId);
+        if (coursePublish == null) {
+            log.error("课程发布信息不存在，courseId: {}", courseId);
+            XueChengPlusException.cast("课程发布信息不存在");
+            return;
+        }
+
+        try {
+            // 使用Hash结构存储课程详细信息
+            String courseHashKey = "course:publish:hash:" + courseId;
+
+            Map<String, Object> courseMap = new HashMap<>();
+
+            // 基础信息
+            courseMap.put("id", coursePublish.getId());
+            courseMap.put("companyId", coursePublish.getCompanyId());
+            courseMap.put("companyName", coursePublish.getCompanyName());
+            courseMap.put("name", coursePublish.getName());
+            courseMap.put("users", coursePublish.getUsers());
+            courseMap.put("tags", coursePublish.getTags());
+            courseMap.put("username", coursePublish.getUsername());
+
+            // 分类信息
+            courseMap.put("mt", coursePublish.getMt());
+            courseMap.put("mtName", coursePublish.getMtName());
+            courseMap.put("st", coursePublish.getSt());
+            courseMap.put("stName", coursePublish.getStName());
+            courseMap.put("grade", coursePublish.getGrade());
+            courseMap.put("teachmode", coursePublish.getTeachmode());
+
+            // 图片和描述
+            courseMap.put("pic", coursePublish.getPic());
+            courseMap.put("description", coursePublish.getDescription());
+
+            // 营销和教学内容（JSON格式）
+            courseMap.put("market", coursePublish.getMarket());
+            courseMap.put("teachplan", coursePublish.getTeachplan());
+            courseMap.put("teachers", coursePublish.getTeachers());
+
+            // 时间信息 - 处理可能的null值
+            courseMap.put("createDate", coursePublish.getCreateDate() != null ?
+                    coursePublish.getCreateDate().toString() : "");
+            courseMap.put("onlineDate", coursePublish.getOnlineDate() != null ?
+                    coursePublish.getOnlineDate().toString() : "");
+            courseMap.put("offlineDate", coursePublish.getOfflineDate() != null ?
+                    coursePublish.getOfflineDate().toString() : "");
+
+            // 状态和价格信息
+            courseMap.put("status", coursePublish.getStatus());
+            courseMap.put("remark", coursePublish.getRemark());
+            courseMap.put("charge", coursePublish.getCharge());
+            courseMap.put("price", coursePublish.getPrice() != null ? coursePublish.getPrice().toString() : "0");
+            courseMap.put("originalPrice", coursePublish.getOriginalPrice() != null ? coursePublish.getOriginalPrice().toString() : "0");
+            courseMap.put("validDays", coursePublish.getValidDays() != null ? coursePublish.getValidDays().toString() : "0");
+
+            // 存储到Redis Hash
+            redisTemplate.opsForHash().putAll(courseHashKey, courseMap);
+
+            // 设置过期时间（30天）
+            redisTemplate.expire(courseHashKey, 30, TimeUnit.DAYS);
+
+            log.info("课程缓存添加成功，courseId: {}, 课程名称: {}", courseId, coursePublish.getName());
+
+            //任务完成 更新任务执行状态
+            mqMessageService.completedStageThree(taskId);
+
+        } catch (Exception e) {
+            log.error("添加课程信息到Redis缓存失败，courseId: {}", courseId, e);
+            XueChengPlusException.cast("添加课程信息到Redis缓存失败");
+        }
     }
 }
