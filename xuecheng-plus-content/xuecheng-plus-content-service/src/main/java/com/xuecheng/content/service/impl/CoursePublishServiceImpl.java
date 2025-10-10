@@ -2,6 +2,7 @@ package com.xuecheng.content.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.xuecheng.base.Enum.CommonEnum;
 import com.xuecheng.base.exception.CommonError;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.content.config.MultipartSupportConfig;
@@ -111,7 +112,7 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         }
         //查询审核状态 当为已提交时不允许重复提交
         String auditStatus = courseBaseInfo.getAuditStatus();
-        if(auditStatus.equals("202003")){
+        if(auditStatus.equals(CommonEnum.COURSE_AUDIT_APPROVED.getValue())){
             XueChengPlusException.cast("课程已提交 请等待审核");
         }
         //校验图片是否上传
@@ -145,7 +146,7 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         String courseTeachersJson = JSON.toJSONString(courseTeachers);
         coursePublishPre.setTeachers(courseTeachersJson);
         //设置审核状态
-        courseBaseInfo.setAuditStatus("202003");
+        courseBaseInfo.setAuditStatus(CommonEnum.COURSE_AUDIT_APPROVED.getValue());
         //提交时间
         courseBaseInfo.setCreateDate(LocalDateTime.now());
         //对是否存在预发布记录进行判断 存在则进行更新 不存在则进行插入
@@ -158,7 +159,7 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         }
         //更新课程基本信息表的状态为已提交
         CourseBase courseBase = courseBaseMapper.selectById(courseId);
-        courseBase.setAuditStatus("202003");
+        courseBase.setAuditStatus(CommonEnum.COURSE_AUDIT_APPROVED.getValue());
         //更新
         courseBaseMapper.updateById(courseBase);
     }
@@ -173,7 +174,7 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         CoursePublishPre coursePublishPre = coursePublishPreMapper.selectById(courseId);
         //状态校验 ->没有审核通过不允许发布
         String status = coursePublishPre.getStatus();
-        if(!status.equals("202004")){
+        if(!status.equals(CommonEnum.COURSE_AUDIT_REJECTED.getValue())){
             XueChengPlusException.cast("课程没有审核通过不允许发布");
         }
         //复制课程信息到发布表

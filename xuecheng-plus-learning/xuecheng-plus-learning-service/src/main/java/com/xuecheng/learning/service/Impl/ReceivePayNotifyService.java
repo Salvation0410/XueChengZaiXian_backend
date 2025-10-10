@@ -1,6 +1,7 @@
 package com.xuecheng.learning.service.Impl;
 
 import com.alibaba.fastjson.JSON;
+import com.xuecheng.base.Enum.CommonEnum;
 import com.xuecheng.learning.config.PayNotifyConfig;
 import com.xuecheng.learning.service.MyCourseTablesService;
 import com.xuecheng.messagesdk.model.po.MqMessage;
@@ -35,8 +36,8 @@ public class ReceivePayNotifyService {
         //根据消息内容 更新选课记录表并插入数据到我的课程表
         String chooseCourseId = mqMessage.getBusinessKey1();
         String orderType = mqMessage.getBusinessKey2();
-        //这里是对消息的类型进行判断 只需要处理支付成功的消息
-        if(orderType.equals("60201")){
+        //这里是对消息的类型进行判断 只需要处理支付成功的消息 60201表示购买课程
+        if(orderType.equals(CommonEnum.RESOURCE_PURCHASED.getValue())){
             //更新 插入操作
             myCourseTablesService.saveChooseCourseSuccess(chooseCourseId);
         }

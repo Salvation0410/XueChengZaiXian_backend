@@ -2,6 +2,7 @@ package com.xuecheng.learning.service.Impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.api.R;
+import com.xuecheng.base.Enum.CommonEnum;
 import com.xuecheng.base.model.RestResponse;
 import com.xuecheng.content.model.po.CoursePublish;
 import com.xuecheng.content.model.po.Teachplan;
@@ -57,26 +58,25 @@ public class LearningServiceImpl implements LearningService {
             //用户已经登陆
             XcCourseTablesDto xcCourseTablesDto = myCourseTablesService.getLearningStatus(userId, courseId);
             String learnStatus = xcCourseTablesDto.getLearnStatus();
-            if("702002".equals(learnStatus)){
+            if(CommonEnum.STUDY_NO_COURSE.getValue().equals(learnStatus)){
                 return RestResponse.validfail("没有选课或选课后没有支付");
-            } else if ("702003".equals(learnStatus)) {
+            } else if (CommonEnum.STUDY_EXPIRED.getValue().equals(learnStatus)) {
                 return RestResponse.validfail("选课已过期");
             }else{
-                //返回视频的播放地址
-                // 远程调用媒资管理模块获取视频url
+
+                // 远程调用媒资管理模块获取视频url  返回视频的播放地址
                 RestResponse<String> playUrl = mediaServiceClient.getPlayUrlByMediaId(mediaId);
                 return playUrl;
             }
         }
         //用户没登陆的情况 查询课程信息 如果不收费则可以正常学习
         String charge = coursepublish.getCharge();
-        if("201000".equals( charge)){
+        if(CommonEnum.COURSE_FREE.getValue().equals( charge)){
             //有资格学习远程调用获取视频播放地址
             RestResponse<String> playUrl = mediaServiceClient.getPlayUrlByMediaId(mediaId);
             return playUrl;
 
         }
-
         return RestResponse.validfail("该课程没有选课");
     }
 }

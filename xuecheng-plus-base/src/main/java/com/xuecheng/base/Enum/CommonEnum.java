@@ -82,8 +82,8 @@ public enum CommonEnum {
     ORDER_REFUNDED("601003", "已退款"),
 
     // ================== 学习资源 ==================
-    RESOURCE_PURCHASED("602001", "购买资料"),
-    RESOURCE_ACCESSED("602002", "学习资料"),
+    RESOURCE_PURCHASED("60201", "购买课程"),
+    RESOURCE_ACCESSED("60202", "学习资料"),
 
     // ================== 支付渠道 ==================
     PAY_ALIPAY("603001", "支付宝"),
@@ -102,8 +102,11 @@ public enum CommonEnum {
     STUDY_NO_COURSE("702002", "没有选课或选课后没有支付"),
     STUDY_EXPIRED("702003", "已过期需申请续期或重新支付"),
 
-    //用户类型
+    // ================== 是否支持试看 ================
+    SUPPORT_TRY_VIEW("1", "支持试看"),
+    NOT_SUPPORT_TRY_VIEW("0", "不支持试看"),
 
+    //=================== 用户类型 ===================
     STUDENT("101001", "学生"),
     TEACHER("101002", "教师"),
     ADMIN("101003", "管理员"),

@@ -65,7 +65,6 @@ public class MyCourseTablesController {
     @GetMapping("/mycoursetable")
     public PageResult<XcCourseTables> mycoursetable(MyCourseTableParams params) {
         SecurityUtil.XcUser user = SecurityUtil.getUser();
-
         if(user == null){
             XueChengPlusException.cast("请登录");
         }

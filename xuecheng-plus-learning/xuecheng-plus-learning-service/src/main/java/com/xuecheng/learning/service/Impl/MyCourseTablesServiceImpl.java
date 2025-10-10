@@ -2,6 +2,7 @@ package com.xuecheng.learning.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.xuecheng.base.Enum.CommonEnum;
 import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.model.PageResult;
 import com.xuecheng.content.model.po.CoursePublish;
@@ -54,7 +55,7 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         }
         String charge = coursePublish.getCharge();
         XcChooseCourse xcChooseCourse = null;
-        if("201000".equals( charge)){
+        if(CommonEnum.COURSE_FREE.getValue().equals( charge)){
             //免费课程则插入选课记录表 我的课程表信息
 
             //添加选课记录表
@@ -87,7 +88,7 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         if(xcCourseTables==null){
             XcCourseTablesDto xcCourseTablesDto = new XcCourseTablesDto();
             //没有选课或选课后没有支付
-            xcCourseTablesDto.setLearnStatus("702002");
+            xcCourseTablesDto.setLearnStatus(CommonEnum.STUDY_NO_COURSE.getValue());
             return xcCourseTablesDto;
         }
         XcCourseTablesDto xcCourseTablesDto = new XcCourseTablesDto();
@@ -96,12 +97,12 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         boolean isExpires = xcCourseTables.getValidtimeEnd().isBefore(LocalDateTime.now());
         if(!isExpires){
             //正常学习
-            xcCourseTablesDto.setLearnStatus("702001");
+            xcCourseTablesDto.setLearnStatus(CommonEnum.STUDY_NORMAL.getValue());
             return xcCourseTablesDto;
 
         }else{
             //已过期
-            xcCourseTablesDto.setLearnStatus("702003");
+            xcCourseTablesDto.setLearnStatus(CommonEnum.STUDY_EXPIRED.getValue());
             return xcCourseTablesDto;
         }
     }
@@ -114,9 +115,9 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
             return false;
         }
         String status = xcChooseCourse.getStatus();
-        if("701002".equals(status)){
-            //更新选课记录的状态为支付成功x
-            xcChooseCourse.setStatus("701001");
+        if(CommonEnum.STUDY_PENDING_PAYMENT.getValue().equals(status)){
+            //更新选课记录的状态为选课成功
+            xcChooseCourse.setStatus(CommonEnum.STUDY_SELECTION.getValue());
             int i =xcChooseCourseMapper.updateById(xcChooseCourse);
             if(i<=0){
                 log.error("添加选课记录失败:{}",xcChooseCourse);
@@ -158,8 +159,8 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         LambdaQueryWrapper<XcChooseCourse> queryWrapper = new LambdaQueryWrapper<XcChooseCourse>()
                 .eq(XcChooseCourse::getUserId,userId)
                 .eq(XcChooseCourse::getCourseId,courseId)
-                .eq(XcChooseCourse::getOrderType,"700001") //免费课程
-                .eq(XcChooseCourse::getStatus,"701001"); //选课成功
+                .eq(XcChooseCourse::getOrderType,CommonEnum.COURSE_FREE_TYPE.getValue()) //免费课程
+                .eq(XcChooseCourse::getStatus,CommonEnum.STUDY_SELECTION.getValue()); //选课成功
 
         List<XcChooseCourse> xcChooseCourses = xcChooseCourseMapper.selectList(queryWrapper);
         //极小概率存在查询多条记录 健壮性判断
@@ -173,9 +174,9 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         xcChooseCourse.setCoursePrice(0f);//免费课程价格为0
         xcChooseCourse.setUserId(userId);
         xcChooseCourse.setCompanyId(coursepublish.getCompanyId());
-        xcChooseCourse.setOrderType("700001");//免费课程
+        xcChooseCourse.setOrderType(CommonEnum.COURSE_FREE_TYPE.getValue());//免费课程
         xcChooseCourse.setCreateDate(LocalDateTime.now());
-        xcChooseCourse.setStatus("701001");//选课成功
+        xcChooseCourse.setStatus(CommonEnum.STUDY_SELECTION.getValue());//选课成功
         xcChooseCourse.setValidDays(365);//免费课程默认365
         xcChooseCourse.setValidtimeStart(LocalDateTime.now());
         xcChooseCourse.setValidtimeEnd(LocalDateTime.now().plusDays(365));
@@ -191,8 +192,8 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         LambdaQueryWrapper<XcChooseCourse> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper = queryWrapper.eq(XcChooseCourse::getUserId, userId)
                 .eq(XcChooseCourse::getCourseId, coursepublish.getId())
-                .eq(XcChooseCourse::getOrderType, "700002")//收费订单
-                .eq(XcChooseCourse::getStatus, "701002");//待支付
+                .eq(XcChooseCourse::getOrderType, CommonEnum.COURSE_PAID_TYPE.getValue())//收费订单
+                .eq(XcChooseCourse::getStatus,CommonEnum.STUDY_PENDING_PAYMENT.getValue());//待支付
         List<XcChooseCourse> xcChooseCourses = xcChooseCourseMapper.selectList(queryWrapper);
         if (xcChooseCourses != null && xcChooseCourses.size()>0) {
             return xcChooseCourses.get(0);
@@ -204,9 +205,9 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         xcChooseCourse.setCoursePrice(coursepublish.getPrice());
         xcChooseCourse.setUserId(userId);
         xcChooseCourse.setCompanyId(coursepublish.getCompanyId());
-        xcChooseCourse.setOrderType("700002");//收费课程
+        xcChooseCourse.setOrderType(CommonEnum.COURSE_PAID_TYPE.getValue());//收费课程
         xcChooseCourse.setCreateDate(LocalDateTime.now());
-        xcChooseCourse.setStatus("701002");//待支付
+        xcChooseCourse.setStatus(CommonEnum.STUDY_PENDING_PAYMENT.getValue());//待支付
 
         xcChooseCourse.setValidDays(coursepublish.getValidDays());
         xcChooseCourse.setValidtimeStart(LocalDateTime.now());
@@ -218,7 +219,7 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
     public XcCourseTables addCourseTables(XcChooseCourse xcChooseCourse){
         //选课记录完成且未过期可以添加课程到课程表
         String status = xcChooseCourse.getStatus();
-        if (!"701001".equals(status)){
+        if (!CommonEnum.STUDY_SELECTION.getValue().equals(status)){
             XueChengPlusException.cast("选课未成功，无法添加到课程表");
         }
         //查询我的课程表
@@ -249,7 +250,10 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
      * @date 2022/10/2 17:07
      */
     public XcCourseTables getXcCourseTables(String userId,Long courseId){
-        XcCourseTables xcCourseTables = xcCourseTablesMapper.selectOne(new LambdaQueryWrapper<XcCourseTables>().eq(XcCourseTables::getUserId, userId).eq(XcCourseTables::getCourseId, courseId));
+        XcCourseTables xcCourseTables = xcCourseTablesMapper.selectOne(
+                new LambdaQueryWrapper<XcCourseTables>()
+                .eq(XcCourseTables::getUserId, userId)
+                .eq(XcCourseTables::getCourseId, courseId));
         return xcCourseTables;
 
     }
