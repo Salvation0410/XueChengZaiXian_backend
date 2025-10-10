@@ -164,8 +164,8 @@ public class CoursePublishTask extends MessageProcessAbstract {
         }
 
         try {
-            // 使用Hash结构存储课程详细信息
-            String courseHashKey = "course:publish:hash:" + courseId;
+            // 使用Hash结构存储课程详细信息 这里配合了redisson的分布式锁
+            String courseHashKey = "course" + courseId;
 
             Map<String, Object> courseMap = new HashMap<>();
 
