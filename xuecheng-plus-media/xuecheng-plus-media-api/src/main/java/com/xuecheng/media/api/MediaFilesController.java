@@ -50,8 +50,7 @@ public class MediaFilesController {
                                    String objectName
                                    ) throws IOException {
 
-     SecurityUtil.XcUser xcUser = SecurityUtil.getUser();
-     String companyId = xcUser.getCompanyId();
+     Long companyId = 1232141425L;
      //准备上传文件的信息
      UploadFileParamsDto uploadFileParamsDto = new UploadFileParamsDto();
      //原始文件名称
@@ -66,7 +65,7 @@ public class MediaFilesController {
      //文件路径
      String localFilePath = tempFile.getAbsolutePath();
      //调用service上传图片
-     UploadFileResultDto uploadFileResultDto = mediaFileService.uploadFile(Long.parseLong(companyId), uploadFileParamsDto, localFilePath, objectName);
+     UploadFileResultDto uploadFileResultDto = mediaFileService.uploadFile(companyId, uploadFileParamsDto, localFilePath, objectName);
 
      return uploadFileResultDto;
 
