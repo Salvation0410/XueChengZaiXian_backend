@@ -1,6 +1,5 @@
 package com.xuecheng.media.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -14,21 +13,12 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 @Configuration
 public class TokenConfig {
 
-    //密钥
-    String SIGNING_KEY = "mq123";
-
-
-//    @Bean
-//    public TokenStore tokenStore() {
-//        //使用内存存储令牌（普通令牌）
-//        return new InMemoryTokenStore();
-//    }
-
-    @Autowired
-    private JwtAccessTokenConverter accessTokenConverter;
+    //jwt签名密钥,与认证服务保持一致
+    private String SIGNING_KEY = "mq123";
 
     @Bean
     public TokenStore tokenStore() {
+        //JWT令牌存储方案
         return new JwtTokenStore(accessTokenConverter());
     }
 
@@ -39,5 +29,9 @@ public class TokenConfig {
         return converter;
     }
 
-
+   /* @Bean
+    public TokenStore tokenStore() {
+        //使用内存存储令牌（普通令牌）
+        return new InMemoryTokenStore();
+    }*/
 }
