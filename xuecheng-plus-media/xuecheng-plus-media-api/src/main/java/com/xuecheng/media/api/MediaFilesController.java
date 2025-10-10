@@ -36,8 +36,9 @@ public class MediaFilesController {
  @ApiOperation("媒资列表查询接口")
  @PostMapping("/files")
  public PageResult<MediaFiles> list(PageParams pageParams, @RequestBody QueryMediaParamsDto queryMediaParamsDto){
-     Long companyId = 1232141425L;
-  return mediaFileService.queryMediaFiels(companyId,pageParams,queryMediaParamsDto);
+     SecurityUtil.XcUser xcUser = SecurityUtil.getUser();
+     String companyId = xcUser.getCompanyId();
+  return mediaFileService.queryMediaFiels(Long.parseLong(companyId),pageParams,queryMediaParamsDto);
 
  }
 

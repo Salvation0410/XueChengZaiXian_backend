@@ -9,35 +9,34 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * @author huang
+ * @author Mr.M
  * @version 1.0
- * @description
- * @date 2025/9/15
+ * @description 用户身份信息获取工具类
+ * @date 2022/10/20 11:41
  */
 @Slf4j
 public class SecurityUtil {
 
     public static XcUser getUser() {
-        try {
-            //获取用户身份信息
-            Object principalObj = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            //检查principalObj是否是字符串
-            if (principalObj instanceof String) {
-                //取出用户身份信息
-                String principal = principalObj.toString();
-                //将json转成对象 反序列化操作
-                XcUser user = JSON.parseObject(principal, XcUser.class);
-                return user;
-            }
-        } catch (Exception e) {
-            log.error("获取当前登录用户身份出错:{}", e.getMessage());
-            e.printStackTrace();
-        }
+        //拿jwt中的用户身份
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        if (principal instanceof String){
+            String jsonString = (String) principal;
+            XcUser xcUser = null;
+            try {
+                xcUser = JSON.parseObject(jsonString, XcUser.class);
+            } catch (Exception e) {
+                log.debug("解析jwt中的用户身份无法转成XcUser对象:{}",jsonString);
+            }
+            return xcUser;
+
+        }
         return null;
     }
 
-    // 成员内部类 仅供当前类使用
+
+
     @Data
     public static class XcUser implements Serializable {
 
@@ -83,6 +82,5 @@ public class SecurityUtil {
 
 
     }
-
 
 }
