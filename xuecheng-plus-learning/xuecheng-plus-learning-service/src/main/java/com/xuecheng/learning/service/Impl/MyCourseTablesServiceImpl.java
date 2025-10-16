@@ -59,13 +59,13 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
             //免费课程则插入选课记录表 我的课程表信息
 
             //添加选课记录表
-             xcChooseCourse = addFreeCourse(userId, coursePublish);
+            xcChooseCourse = addFreeCourse(userId, coursePublish);
             //添加我的课程表 我的课程表的信息即来源于选课记录表
             XcCourseTables xcCourseTables = addCourseTables(xcChooseCourse);
 
         }else{
             //收费只插入选课记录表
-             xcChooseCourse = addChargeCourse(userId, coursePublish);
+            xcChooseCourse = addChargeCourse(userId, coursePublish);
         }
         //判断学生的学习资格 XcChooseCourseDto
         XcCourseTablesDto xcCourseTablesDto = getLearningStatus(userId, courseId);
@@ -78,9 +78,9 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
     }
 
     /*
-    * 获取学习资格
-    * XcCourseTablesDto 学习资格状态 [{"code":"702001","desc":"正常学习"},{"code":"702002","desc":"没有选课或选课后没有支付"},{"code":"702003","desc":"已过期需要申请续期或重新支付"}]
-    * */
+     * 获取学习资格
+     * XcCourseTablesDto 学习资格状态 [{"code":"702001","desc":"正常学习"},{"code":"702002","desc":"没有选课或选课后没有支付"},{"code":"702003","desc":"已过期需要申请续期或重新支付"}]
+     * */
     @Override
     public XcCourseTablesDto getLearningStatus(String userId, Long courseId) {
         //查询我的课程表
@@ -127,8 +127,6 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
             XcCourseTables xcCourseTables = addCourseTables(xcChooseCourse);
             return true;
         }
-
-
         return false;
     }
 
@@ -252,8 +250,8 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
     public XcCourseTables getXcCourseTables(String userId,Long courseId){
         XcCourseTables xcCourseTables = xcCourseTablesMapper.selectOne(
                 new LambdaQueryWrapper<XcCourseTables>()
-                .eq(XcCourseTables::getUserId, userId)
-                .eq(XcCourseTables::getCourseId, courseId));
+                        .eq(XcCourseTables::getUserId, userId)
+                        .eq(XcCourseTables::getCourseId, courseId));
         return xcCourseTables;
 
     }

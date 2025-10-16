@@ -33,8 +33,6 @@ public class    PasswordAuthServiceImpl implements AuthService {
     @Override
     public XcUserExt execute(AuthParamsDto authParamsDto) {
 
-
-
         //账号是否存在
         String username = authParamsDto.getUsername();
 
