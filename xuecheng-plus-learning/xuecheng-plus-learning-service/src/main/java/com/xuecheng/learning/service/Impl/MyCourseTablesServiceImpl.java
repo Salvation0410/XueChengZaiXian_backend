@@ -17,12 +17,17 @@ import com.xuecheng.learning.model.po.XcCourseTables;
 import com.xuecheng.learning.service.MyCourseTablesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author huang
@@ -44,20 +49,59 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
     //远程调用内容管理接口
     private final ContentServiceClient contentServiceClient;
 
+    @Autowired
+    RedissonClient redissonClient;
+
     @Override
-    @Transactional
-    //TODO 优化 这里不能使用@Transactional @Transactional 只能控制单个数据库的事务 这里涉及远程调用 需要用到分布式事务 最终一致性+mq补偿机制(优化方案)
     public XcChooseCourseDto addChooseCourse(String userId, Long courseId) {
-        //选课调用内容管理模块查询课程的收费规则
+        // 使用课程ID作为锁的key，确保同一课程的选课操作串行化
+        String lockKey = "choose_course_lock:" + courseId + ":" + userId;
+        RLock lock = redissonClient.getLock(lockKey);
+        try {
+            // 尝试获取锁，最多等待5秒，锁持有时间30秒
+            boolean isLocked = lock.tryLock(5, 30, TimeUnit.SECONDS);
+
+            if (!isLocked) {
+                XueChengPlusException.cast("系统繁忙，请稍后重试");
+            }
+            // 在锁内执行核心选课逻辑
+            return doAddChooseCourse(userId, courseId);
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("选课操作被中断", e);
+            XueChengPlusException.cast("选课操作被中断");
+        } catch (Exception e) {
+            log.error("选课操作异常", e);
+            XueChengPlusException.cast("选课失败，请重试");
+        } finally {
+            // 确保释放锁
+            if (lock != null && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
+        return null;
+    }
+    /*
+    * 实际的选课逻辑 使用redisson进行事务控制
+    * */
+    private XcChooseCourseDto doAddChooseCourse(String userId,Long courseId){
         CoursePublish coursePublish = contentServiceClient.getCoursepublish(courseId);
         if(coursePublish == null){
             XueChengPlusException.cast("课程不存在");
         }
+        //检查用户是否重复选课
+        XcChooseCourse existingCourse = checkExistingChooseCourse(userId, courseId);
+        if(existingCourse  != null){
+            log.info("用户{}已经选过课程{},返回已有记录",userId,courseId);
+            return buildChooseCourseDto(existingCourse,userId,courseId);
+        }
+
         String charge = coursePublish.getCharge();
         XcChooseCourse xcChooseCourse = null;
+
         if(CommonEnum.COURSE_FREE.getValue().equals( charge)){
             //免费课程则插入选课记录表 我的课程表信息
-
             //添加选课记录表
             xcChooseCourse = addFreeCourse(userId, coursePublish);
             //添加我的课程表 我的课程表的信息即来源于选课记录表
@@ -75,7 +119,39 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         xcChooseCourseDto.setLearnStatus(xcCourseTablesDto.getLearnStatus());
 
         return xcChooseCourseDto;
+
     }
+
+    /*
+    * 构建返回选课dto对象
+    * */
+    private XcChooseCourseDto buildChooseCourseDto(XcChooseCourse chooseCourse, String userId, Long courseId) {
+        XcCourseTablesDto learningStatus = getLearningStatus(userId, courseId);
+        XcChooseCourseDto xcChooseCourseDto = new XcChooseCourseDto();
+        BeanUtils.copyProperties(chooseCourse, xcChooseCourseDto);
+        xcChooseCourseDto.setLearnStatus(learningStatus.getLearnStatus());
+        return xcChooseCourseDto;
+    }
+
+    /*
+    * 检查是否已经存在选课
+    * */
+    private XcChooseCourse checkExistingChooseCourse(String userId, Long courseId) {
+        LambdaQueryWrapper<XcChooseCourse> queryWrapper = new LambdaQueryWrapper<XcChooseCourse>()
+                .eq(XcChooseCourse::getUserId, userId)
+                .eq(XcChooseCourse::getCourseId, courseId);
+
+        List<XcChooseCourse> existingCourses = xcChooseCourseMapper.selectList(queryWrapper);
+
+        if (!existingCourses.isEmpty()) {
+            // 返回最新的记录
+            return existingCourses.stream()
+                    .max(Comparator.comparing(XcChooseCourse::getCreateDate))
+                    .orElse(null);
+        }
+        return null;
+    }
+
 
     /*
      * 获取学习资格
