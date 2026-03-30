@@ -105,7 +105,6 @@ public class VideoTask {
                         mediaFileProcessService.saveProcessFinishStatus(taskId, "3", fileId, null, truncatedError);
                         return;
                     }
-
                     //3.执行任务转码 使用ffmpeg工具类
 
                     //源avi文件的路径
@@ -138,7 +137,6 @@ public class VideoTask {
                         mediaFileProcessService.saveProcessFinishStatus(taskId, "3", fileId, null, truncatedError);
                         return;
                     }
-
 
                     //4.上传视频到minio
                     boolean b1 = mediaFileService.addMediaFilesToMinIO(mp4File.getAbsolutePath(), "video/mp4", bucket, objectName);

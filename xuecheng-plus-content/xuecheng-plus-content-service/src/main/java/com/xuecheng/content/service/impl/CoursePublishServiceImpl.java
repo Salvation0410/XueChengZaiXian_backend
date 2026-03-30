@@ -215,7 +215,6 @@ public class CoursePublishServiceImpl implements CoursePublishService {
             configuration.setTemplateLoader(new ClassTemplateLoader(this.getClass().getClassLoader(), "/templates/"));
             //指定编码格式
             configuration.setDefaultEncoding("utf-8");
-
             //获取模板
             Template template = configuration.getTemplate("course_template.html");
             //准备页面数据

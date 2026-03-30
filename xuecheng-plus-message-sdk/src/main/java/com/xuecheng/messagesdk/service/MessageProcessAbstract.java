@@ -54,7 +54,6 @@ public abstract class MessageProcessAbstract {
             if(size<=0){
                 return ;
             }
-
             //创建线程池
             ExecutorService threadPool = Executors.newFixedThreadPool(size);
             //计数器

@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class SearchServiceClientFallbackFactory implements FallbackFactory<SearchServiceClient> {
-
-
     @Override
     public SearchServiceClient create(Throwable throwable) {
         return new SearchServiceClient() {

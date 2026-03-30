@@ -364,7 +364,6 @@ public class MediaFileServiceImpl implements MediaFileService {
   //获取合并后的文件路径即objectName
   String objectName = getFilePathByMd5(fileMd5,extension);
 
-
   //指定合并后的objectName等信息
   ComposeObjectArgs composeObjectArgs = ComposeObjectArgs.builder()
           .bucket(bucket_video)

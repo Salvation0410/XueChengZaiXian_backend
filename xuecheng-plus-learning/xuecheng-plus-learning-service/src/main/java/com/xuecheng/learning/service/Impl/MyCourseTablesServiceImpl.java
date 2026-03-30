@@ -60,7 +60,6 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         try {
             // 尝试获取锁，最多等待5秒，锁持有时间30秒
             boolean isLocked = lock.tryLock(5, 30, TimeUnit.SECONDS);
-
             if (!isLocked) {
                 XueChengPlusException.cast("系统繁忙，请稍后重试");
             }
@@ -82,6 +81,7 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         }
         return null;
     }
+
     /*
     * 实际的选课逻辑 使用redisson进行事务控制
     * */
@@ -100,7 +100,7 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         String charge = coursePublish.getCharge();
         XcChooseCourse xcChooseCourse = null;
 
-        if(CommonEnum.COURSE_FREE.getValue().equals( charge)){
+        if(CommonEnum.COURSE_FREE.getValue().equals(charge)){
             //免费课程则插入选课记录表 我的课程表信息
             //添加选课记录表
             xcChooseCourse = addFreeCourse(userId, coursePublish);

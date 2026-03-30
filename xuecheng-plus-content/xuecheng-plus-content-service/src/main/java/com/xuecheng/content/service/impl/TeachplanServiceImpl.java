@@ -146,7 +146,6 @@ public class TeachplanServiceImpl implements TeachplanService {
         if(teachplanList.get(0).getId().equals(id)){
             XueChengPlusException.cast("当前为第一个课程计划，无法上移");
         }
-
         // 获取当前课程计划在列表中的位置
         //创建一个整数流 获取从0到teachplanList.size()-1 的所有整数
         int currentIndex = IntStream.range(0, teachplanList.size())

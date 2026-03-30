@@ -52,7 +52,6 @@ public class BigFilesController {
                                     @RequestParam("fileMd5") String fileMd5,
                                     @RequestParam("chunk") int chunk) throws Exception {
         //创建一个临时文件
-        //TODO 接口优化 使用输入流或者MultipartFile 获取文件
         File tempFile = File.createTempFile("minio", ".temp");
         file.transferTo(tempFile);
         //获取临时文件路径
