@@ -22,6 +22,8 @@ public class ThreadPoolConfig {
 
     @Bean("mediaProcessThreadPool")
     public ExecutorService mediaProcessThreadPool() {
+
+        //最大线程数 默认CPU核数
         int corePoolSize = Runtime.getRuntime().availableProcessors();
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
                 corePoolSize,  //核心线程数
