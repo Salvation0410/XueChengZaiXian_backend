@@ -58,8 +58,8 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
         String lockKey = "choose_course_lock:" + courseId + ":" + userId;
         RLock lock = redissonClient.getLock(lockKey);
         try {
-            // 尝试获取锁，最多等待5秒，锁持有时间30秒
-            boolean isLocked = lock.tryLock(5, 30, TimeUnit.SECONDS);
+            // 尝试获取锁，最多等待5秒，锁持有时间30秒 do：这里更改为了使用Redisson的看门狗机制进行锁续期
+            boolean isLocked = lock.tryLock(5,TimeUnit.SECONDS);
             if (!isLocked) {
                 XueChengPlusException.cast("系统繁忙，请稍后重试");
             }

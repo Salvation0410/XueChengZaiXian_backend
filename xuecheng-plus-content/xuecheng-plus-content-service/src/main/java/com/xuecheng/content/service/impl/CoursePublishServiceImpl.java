@@ -168,6 +168,7 @@ public class CoursePublishServiceImpl implements CoursePublishService {
     * 发布课程
     * */
     @Override
+    @Transactional
     public void publish(Long companyId, Long courseId) {
 
         //查询预发布表数据
