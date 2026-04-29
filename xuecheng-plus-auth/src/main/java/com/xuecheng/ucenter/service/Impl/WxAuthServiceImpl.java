@@ -72,7 +72,6 @@ public class WxAuthServiceImpl implements AuthService, WxAuthService {
     * @description 微信扫码认证 申请令牌 携带令牌查询用户信息 保存用户信息到数据库
     * @param code 微信扫码返回的code
     * */
-
     @Override
     public XcUser wxAuth(String code) {
         //申请令牌

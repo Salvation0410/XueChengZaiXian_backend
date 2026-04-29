@@ -47,11 +47,12 @@ public class    PasswordAuthServiceImpl implements AuthService {
             throw new RuntimeException("验证码错误");
         }
 
-        XcUser xcUser = xcUserMapper.selectOne(new LambdaQueryWrapper<XcUser>().eq(XcUser::getUsername, username));
+        XcUser xcUser = xcUserMapper.selectOne(
+                new LambdaQueryWrapper<XcUser>()
+                        .eq(XcUser::getUsername, username));
         if(xcUser == null){
             throw  new RuntimeException("账号不存在");
         }
-
         //验证密码
         String password = xcUser.getPassword();
         //获取用户输入的密码
