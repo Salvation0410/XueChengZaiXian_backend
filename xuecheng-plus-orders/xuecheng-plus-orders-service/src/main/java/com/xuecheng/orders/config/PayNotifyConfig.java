@@ -59,7 +59,8 @@ public class PayNotifyConfig implements ApplicationContextAware {
             // 投递失败，记录日志
             log.info("消息发送失败，应答码{}，原因{}，交换机{}，路由键{},消息{}",
                     replyCode, replyText, exchange, routingKey, message.toString());
-            MqMessage mqMessage = JSON.parseObject(message.toString(), MqMessage.class);
+            // 修改消息反序列化的写法 message.toString() 往往不是消息体 JSON，而是对象描述字符串 需要从body获取
+            MqMessage mqMessage = JSON.parseObject(new String(message.getBody()), MqMessage.class);
             //将消息再添加到消息表
             mqMessageService.addMessage(mqMessage.getMessageType(),mqMessage.getBusinessKey1(),mqMessage.getBusinessKey2(),mqMessage.getBusinessKey3());
 

@@ -310,7 +310,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /*
-    * mq 消息通知
+    * mq 消息通知 这里是RabbitMQ的生产者确认机制的实现
     * */
     @Override
     public void notifyPayResult(MqMessage message) {
@@ -341,7 +341,6 @@ public class OrderServiceImpl implements OrderService {
                 },ex->{
                     //异常处理
                     log.info("发送消息异常:{}",ex.getMessage());
-
                 }
         );
         //参数：交换机，路由键，消息，消息回调对象

@@ -63,6 +63,7 @@ public abstract class MessageProcessAbstract {
                     log.debug("开始任务:{}",message);
                     //处理任务
                     try {
+                        // 处理任务的具体是实现
                         boolean result = execute(message);
                         if(result){
                             log.debug("任务执行成功:{})",message);
