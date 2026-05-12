@@ -41,7 +41,5 @@ public class ReceivePayNotifyService {
             //更新 插入操作
             myCourseTablesService.saveChooseCourseSuccess(chooseCourseId);
         }
-
-
     }
 }
