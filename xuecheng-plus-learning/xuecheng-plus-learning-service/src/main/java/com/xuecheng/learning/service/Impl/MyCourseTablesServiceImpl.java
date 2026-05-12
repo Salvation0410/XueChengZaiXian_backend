@@ -54,7 +54,7 @@ public class MyCourseTablesServiceImpl implements MyCourseTablesService {
 
     @Override
     public XcChooseCourseDto addChooseCourse(String userId, Long courseId) {
-        // 使用课程ID作为锁的key，确保同一课程的选课操作串行化
+        // 使用课程ID和用户id作为锁的key，确保同一课程的选课操作串行化
         String lockKey = "choose_course_lock:" + courseId + ":" + userId;
         RLock lock = redissonClient.getLock(lockKey);
         try {

@@ -170,7 +170,6 @@ public class CoursePublishServiceImpl implements CoursePublishService {
     @Override
     @Transactional
     public void publish(Long companyId, Long courseId) {
-
         //查询预发布表数据
         CoursePublishPre coursePublishPre = coursePublishPreMapper.selectById(courseId);
         //状态校验 ->没有审核通过不允许发布
@@ -188,13 +187,10 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         }else{
             coursePublishMapper.updateById(coursePublish);
         }
-
         //写入消息表 使用消息 sdk工具包实现
         saveCoursePublishMessage(courseId);
         //删除预发布表数据
         coursePublishPreMapper.deleteById(courseId);
-
-
     }
     /*
     * 课程页面静态化
@@ -203,11 +199,9 @@ public class CoursePublishServiceImpl implements CoursePublishService {
     public File generateCourseHtml(Long courseId) {
         //最终的静态化页面文件
         File htmlFile = null;
-
         try{
             //创建配置对象
             Configuration configuration = new Configuration(Configuration.getVersion());
-
             //获取资源文件路径
             String classPath = this.getClass().getResource("/").getPath();
             //指定模板的目录

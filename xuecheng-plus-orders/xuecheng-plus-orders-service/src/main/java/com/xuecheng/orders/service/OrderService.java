@@ -35,8 +35,6 @@ public interface OrderService {
      * @return 支付记录信息
      */
     public PayRecordDto queryPayResult(String payNo);
-
-
     /**
      * @description 保存支付宝支付结果
      * @param payStatusDto  支付结果信息
