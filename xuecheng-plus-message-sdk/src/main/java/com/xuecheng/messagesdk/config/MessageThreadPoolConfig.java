@@ -1,4 +1,4 @@
-package com.xuecheng.media.config;
+package com.xuecheng.messagesdk.config;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.springframework.context.annotation.Bean;
@@ -10,29 +10,23 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @ClassName ThreadPoolConfig
- * @Description 线程池配置类 全局公用一个线程池 防止重复创建线程池
- * @Author huang
- * @Date 2025/9/5
+ * @description message 模块线程池配置
  */
-
-
 @Configuration
-public class ThreadPoolConfig {
+public class MessageThreadPoolConfig {
 
-    @Bean(value = "mediaProcessThreadPool", destroyMethod = "shutdown")
-    public ExecutorService mediaProcessThreadPool() {
-
+    @Bean(value = "messageProcessThreadPool", destroyMethod = "shutdown")
+    public ExecutorService messageProcessThreadPool() {
         int processors = Runtime.getRuntime().availableProcessors();
-        int corePoolSize = processors + 1;
+        int corePoolSize = processors * 2 + 1;
         int maximumPoolSize = processors * 2 + 1;
         return new ThreadPoolExecutor(
                 corePoolSize,
                 maximumPoolSize,
                 60L,
                 TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(30),
-                new ThreadFactoryBuilder().setNameFormat("media-process-pool-%d").build(),
+                new LinkedBlockingQueue<>(100),
+                new ThreadFactoryBuilder().setNameFormat("message-process-pool-%d").build(),
                 new ThreadPoolExecutor.CallerRunsPolicy()
         );
     }

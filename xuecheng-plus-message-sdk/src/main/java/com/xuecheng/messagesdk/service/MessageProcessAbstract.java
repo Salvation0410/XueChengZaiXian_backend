@@ -2,10 +2,12 @@ package com.xuecheng.messagesdk.service;
 
 import com.xuecheng.messagesdk.model.po.MqMessage;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Mr.M
@@ -15,12 +17,15 @@ import java.util.concurrent.*;
  */
 @Slf4j
 @Data
-@RequiredArgsConstructor
 public abstract class MessageProcessAbstract {
 
-
     private final MqMessageService mqMessageService;
+    private final ExecutorService messageProcessThreadPool;
 
+    protected MessageProcessAbstract(MqMessageService mqMessageService, ExecutorService messageProcessThreadPool) {
+        this.mqMessageService = mqMessageService;
+        this.messageProcessThreadPool = messageProcessThreadPool;
+    }
 
     /**
      * @param mqMessage 执行任务内容
@@ -46,28 +51,20 @@ public abstract class MessageProcessAbstract {
     public void process(int shardIndex, int shardTotal,  String messageType,int count,long timeout) {
 
         try {
-            //扫描消息表获取任务清单
             List<MqMessage> messageList = mqMessageService.getMessageList(shardIndex, shardTotal,messageType, count);
-            //任务个数
             int size = messageList.size();
-            log.debug("取出待处理消息"+size+"条");
+            log.debug("取出待处理消息{}条", size);
             if(size<=0){
                 return ;
             }
-            //创建线程池
-            ExecutorService threadPool = Executors.newFixedThreadPool(size);
-            //计数器
+
             CountDownLatch countDownLatch = new CountDownLatch(size);
             messageList.forEach(message -> {
-                threadPool.execute(() -> {
+                messageProcessThreadPool.execute(() -> {
                     log.debug("开始任务:{}",message);
-                    //处理任务
                     try {
-                        // 处理任务的具体是实现
                         boolean result = execute(message);
                         if(result){
-                            log.debug("任务执行成功:{})",message);
-                            //更新任务状态,删除消息表记录,添加到历史表
                             int completed = mqMessageService.completed(message.getId());
                             if (completed>0){
                                 log.debug("任务执行成功:{}",message);
@@ -76,10 +73,8 @@ public abstract class MessageProcessAbstract {
                             }
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        log.debug("任务出现异常:{},任务:{}",e.getMessage(),message);
-                    }finally {
-                        //计数
+                        log.error("任务出现异常,任务:{}", message, e);
+                    } finally {
                         countDownLatch.countDown();
                     }
                     log.debug("结束任务:{}",message);
@@ -87,12 +82,11 @@ public abstract class MessageProcessAbstract {
                 });
             });
 
-            //等待,给一个充裕的超时时间,防止无限等待，到达超时时间还没有处理完成则结束任务
             countDownLatch.await(timeout,TimeUnit.SECONDS);
-            System.out.println("结束....");
+            log.debug("消息处理结束");
         } catch (InterruptedException e) {
-           e.printStackTrace();
-
+            Thread.currentThread().interrupt();
+            log.error("消息处理线程被中断", e);
         }
 
 

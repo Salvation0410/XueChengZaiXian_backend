@@ -14,12 +14,14 @@ import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,8 +48,9 @@ public class CoursePublishTask extends MessageProcessAbstract {
     @Autowired
     RedisTemplate redisTemplate;
 
-    public CoursePublishTask(MqMessageService mqMessageService) {
-        super(mqMessageService);
+    public CoursePublishTask(MqMessageService mqMessageService,
+                             @Qualifier("messageProcessThreadPool") ExecutorService messageProcessThreadPool) {
+        super(mqMessageService, messageProcessThreadPool);
     }
     /*
     * 任务调度入口
